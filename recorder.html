@@ -2,19 +2,26 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-  <title>AI議事録録音アプリ</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>AI議事録作成アプリ</title>
+
   <style>
     :root {
-      --bg: #f4f6f8;
+      --main: #24577f;
+      --green: #10863b;
+      --green-dark: #08702f;
+      --blue: #1f5f93;
+      --gray: #9aa6b2;
+      --bg: #f3f6f9;
       --card: #ffffff;
-      --main: #1f4e79;
-      --accent: #0b7a3b;
-      --danger: #c62828;
-      --warn: #ef6c00;
-      --text: #222;
-      --muted: #666;
-      --border: #d9dee5;
+      --border: #d8e0e8;
+      --danger-bg: #fdeaea;
+      --danger: #9b1c1c;
+      --success-bg: #e8f7ed;
+      --success: #116b35;
+      --warning-bg: #fff6df;
+      --warning: #8a5a00;
+      --text: #20262d;
     }
 
     * {
@@ -23,893 +30,907 @@
 
     body {
       margin: 0;
-      padding: 16px;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Hiragino Sans", "Yu Gothic", "Meiryo", sans-serif;
+      padding: 0;
       background: var(--bg);
       color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
     }
 
-    .container {
-      max-width: 880px;
+    .app {
+      width: 100%;
+      max-width: 960px;
       margin: 0 auto;
+      padding: 16px;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #1f5f93, #163e60);
+      color: #fff;
+      border-radius: 18px;
+      padding: 22px 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 26px;
+      line-height: 1.3;
+    }
+
+    .header p {
+      margin: 8px 0 0;
+      font-size: 15px;
+      opacity: 0.92;
     }
 
     .card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 18px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      border-radius: 18px;
+      padding: 20px;
       margin-bottom: 16px;
-    }
-
-    h1 {
-      font-size: 24px;
-      margin: 0 0 10px;
-      color: var(--main);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.04);
     }
 
     h2 {
-      font-size: 18px;
-      margin: 0 0 12px;
+      margin: 0 0 14px;
+      font-size: 22px;
       color: var(--main);
     }
 
     label {
       display: block;
       font-weight: 700;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      font-size: 17px;
     }
 
-    input, select, textarea, button {
+    input[type="text"],
+    textarea {
       width: 100%;
-      font-size: 16px;
-      border-radius: 10px;
-    }
-
-    input, select, textarea {
       border: 1px solid var(--border);
-      padding: 12px;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 17px;
       background: #fff;
     }
 
     textarea {
-      min-height: 120px;
+      min-height: 90px;
       resize: vertical;
     }
 
-    .row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-
     .field {
-      margin-bottom: 14px;
+      margin-bottom: 18px;
     }
 
-    .button-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-      margin-top: 12px;
-    }
-
-    button {
+    .button {
+      width: 100%;
       border: none;
-      padding: 14px 12px;
+      border-radius: 16px;
+      padding: 16px 18px;
+      font-size: 20px;
       font-weight: 800;
-      cursor: pointer;
       color: #fff;
-      background: var(--main);
-      box-shadow: 0 3px 0 rgba(0,0,0,0.18);
+      cursor: pointer;
+      margin-bottom: 14px;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15);
+      touch-action: manipulation;
     }
 
-    button:active {
-      transform: translateY(2px);
-      box-shadow: 0 1px 0 rgba(0,0,0,0.18);
-    }
-
-    button:disabled {
-      background: #9aa6b2;
+    .button:disabled {
+      background: var(--gray) !important;
       cursor: not-allowed;
       box-shadow: none;
-      transform: none;
+      opacity: 0.85;
     }
 
-    .start {
-      background: var(--accent);
+    .button-green {
+      background: var(--green);
     }
 
-    .stop {
-      background: var(--danger);
+    .button-green:active {
+      background: var(--green-dark);
     }
 
-    .test {
-      background: var(--main);
+    .button-blue {
+      background: var(--blue);
     }
 
-    .secondary {
-      background: #5f6f7f;
+    .button-gray {
+      background: #667788;
+    }
+
+    .button-red {
+      background: #a62828;
+    }
+
+    .button-small {
+      font-size: 16px;
+      padding: 12px;
+      border-radius: 12px;
+    }
+
+    .timer {
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      background: #eef3f7;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 18px;
     }
 
     .status {
-      padding: 12px;
-      border-radius: 12px;
-      background: #eef3f8;
-      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      font-weight: 800;
       white-space: pre-wrap;
       word-break: break-word;
-      line-height: 1.6;
-      min-height: 70px;
     }
 
-    .status.ok {
-      background: #edf7ed;
-      color: #145a32;
+    .status-idle {
+      background: #eef3f7;
+      border: 1px solid var(--border);
+      color: #26313b;
     }
 
-    .status.warn {
-      background: #fff4e5;
-      color: #7a3b00;
+    .status-success {
+      background: var(--success-bg);
+      border: 1px solid #b7e3c5;
+      color: var(--success);
     }
 
-    .status.error {
-      background: #fdecea;
-      color: #8a1c1c;
+    .status-warning {
+      background: var(--warning-bg);
+      border: 1px solid #f2da99;
+      color: var(--warning);
     }
 
-    .meter {
-      height: 14px;
-      background: #dde3ea;
-      border-radius: 99px;
+    .status-danger {
+      background: var(--danger-bg);
+      border: 1px solid #efc0c0;
+      color: var(--danger);
+    }
+
+    .progress-wrap {
+      width: 100%;
+      height: 18px;
+      background: #dbe4ec;
+      border-radius: 999px;
       overflow: hidden;
-      margin-top: 8px;
+      margin-bottom: 8px;
     }
 
-    .meter-bar {
+    .progress-bar {
       height: 100%;
       width: 0%;
-      background: var(--accent);
-      transition: width 0.2s;
+      background: var(--green);
+      transition: width 0.25s ease;
     }
 
-    .small {
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .log {
+    .log-box {
+      background: #101923;
+      color: #eef5ff;
+      border-radius: 16px;
+      padding: 16px;
+      min-height: 120px;
       max-height: 260px;
       overflow-y: auto;
-      background: #101820;
-      color: #e9f1f7;
-      padding: 12px;
-      border-radius: 12px;
-      font-size: 13px;
+      font-size: 14px;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
-    .danger-text {
-      color: var(--danger);
-      font-weight: 700;
+    .note {
+      color: #666;
+      font-weight: 600;
     }
 
-    .success-link {
+    .link-area a {
       display: block;
-      padding: 12px;
-      background: #edf7ed;
-      border: 1px solid #b7dfb9;
-      color: #145a32;
-      border-radius: 12px;
-      margin-top: 10px;
-      word-break: break-all;
+      color: #fff;
+      background: var(--blue);
+      text-align: center;
+      text-decoration: none;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 18px;
+      font-weight: 800;
+      margin-top: 12px;
     }
 
-    @media (max-width: 700px) {
-      body {
-        padding: 10px;
+    .hidden {
+      display: none !important;
+    }
+
+    .debug {
+      border: 2px dashed #b5c2cf;
+    }
+
+    ul {
+      margin: 8px 0 0 20px;
+      padding: 0;
+    }
+
+    @media (max-width: 600px) {
+      .app {
+        padding: 12px;
       }
 
-      h1 {
-        font-size: 21px;
-      }
-
-      .row,
-      .button-row {
-        grid-template-columns: 1fr;
+      .header h1 {
+        font-size: 22px;
       }
 
       .card {
-        padding: 14px;
-        border-radius: 14px;
+        padding: 16px;
       }
 
-      button {
-        padding: 15px 10px;
+      .button {
+        font-size: 18px;
+        padding: 15px;
+      }
+
+      .timer {
+        font-size: 28px;
       }
     }
   </style>
 </head>
+
 <body>
-<div class="container">
+  <div class="app">
 
-  <div class="card">
-    <h1>AI議事録録音アプリ</h1>
-    <div class="small">
-      録音はこのページで行い、音声データはGASへ分割送信します。APIキーはHTML側には保存しません。
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>会議情報</h2>
-
-    <div class="field">
-      <label for="meetingTitle">議事録名</label>
-      <input id="meetingTitle" type="text" placeholder="例：2026年5月 経営会議">
+    <div class="header">
+      <h1>AI議事録作成アプリ</h1>
+      <p>録音 → Gemini解析 → Googleドキュメント保存</p>
     </div>
 
-    <div class="row">
+    <div class="card">
+      <h2>会議情報</h2>
+
       <div class="field">
-        <label for="segmentSeconds">分割秒数</label>
-        <select id="segmentSeconds">
-          <option value="30">30秒：安定優先</option>
-          <option value="60" selected>60秒：標準</option>
-          <option value="120">120秒：長め</option>
-          <option value="180">180秒：通信安定時のみ</option>
-        </select>
+        <label for="meetingTitle">議事録名</label>
+        <input type="text" id="meetingTitle" placeholder="例：2026年5月 経営会議">
       </div>
 
       <div class="field">
-        <label for="audioBits">音声ビットレート</label>
-        <select id="audioBits">
-          <option value="32000">32kbps：容量小</option>
-          <option value="48000" selected>48kbps：標準</option>
-          <option value="64000">64kbps：音質優先</option>
-          <option value="96000">96kbps：高音質</option>
-        </select>
+        <label for="extraPrompt">追加指示 任意</label>
+        <textarea id="extraPrompt" placeholder="例：決定事項と担当者を特に詳しく整理してください"></textarea>
       </div>
+
+      <button id="resetButton" class="button button-gray" type="button">
+        画面リセット
+      </button>
     </div>
 
-    <div class="button-row">
-      <button class="test" id="healthBtn">GAS接続テスト</button>
-      <button class="secondary" id="resetBtn">画面リセット</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2>録音操作</h2>
-
-    <div class="button-row">
-      <button class="start" id="startBtn">録音開始</button>
-      <button class="stop" id="stopBtn" disabled>録音停止・議事録作成</button>
+    <div id="debugArea" class="card debug hidden">
+      <h2>開発用</h2>
+      <button id="healthButton" class="button button-blue button-small" type="button">
+        GAS接続テスト
+      </button>
     </div>
 
-    <div class="field" style="margin-top:14px;">
+    <div class="card">
+      <h2>録音操作</h2>
+
+      <button id="startButton" class="button button-green" type="button">
+        録音開始
+      </button>
+
+      <button id="stopButton" class="button button-blue" type="button" disabled>
+        録音停止・議事録作成
+      </button>
+
       <label>録音時間</label>
-      <div id="timer" class="status">00:00:00</div>
-    </div>
+      <div id="timer" class="timer">00:00:00</div>
 
-    <div class="field">
       <label>処理状況</label>
-      <div id="status" class="status">待機中</div>
-      <div class="meter">
-        <div id="meterBar" class="meter-bar"></div>
+      <div id="status" class="status status-idle">待機中です。</div>
+
+      <div class="progress-wrap">
+        <div id="progressBar" class="progress-bar"></div>
       </div>
+
+      <div id="docLinkArea" class="link-area hidden"></div>
     </div>
 
-    <div id="resultArea"></div>
-  </div>
-
-  <div class="card">
-    <h2>ログ</h2>
-    <div id="log" class="log"></div>
-  </div>
-
-  <div class="card">
-    <h2>注意事項</h2>
-    <div class="small">
-      <div>・iPhone/iPadでは、画面ロックやブラウザ切替で録音が止まる場合があります。</div>
-      <div>・長時間会議では30秒または60秒分割を推奨します。</div>
-      <div>・通信が不安定な場合、録音停止後のアップロード完了まで画面を閉じないでください。</div>
-      <div>・Geminiが対応しない音声形式の場合、音声保存は成功しても文字起こしが失敗する可能性があります。</div>
+    <div class="card">
+      <h2>ログ</h2>
+      <div id="logBox" class="log-box"></div>
     </div>
+
+    <div class="card">
+      <h2>注意事項</h2>
+      <ul class="note">
+        <li>iPhone/iPadでは、設定 → ChromeまたはSafari → マイクをONにしてください。</li>
+        <li>録音中に画面ロックやブラウザ切替をすると録音が止まる場合があります。</li>
+        <li>通信が不安定な場合、録音停止後のアップロード完了まで画面を閉じないでください。</li>
+        <li>Gemini APIの無料枠では、長時間会議や連続利用で429エラーが出る場合があります。</li>
+      </ul>
+    </div>
+
   </div>
 
-</div>
+  <script>
+    /****************************************************
+     * AI議事録作成WEBアプリ HTML 完全版
+     ****************************************************/
 
-<script>
-/****************************************************
- * recorder.html 完全版
- * GitHub Pages / HTTPS公開HTML用
- ****************************************************/
+    const GAS_URL = 'https://script.google.com/macros/s/AKfycbwkCkHB13kZLE2vTad10HD1x8bgUxcmMqhq2V0qnbOpiQTxv-lgV-1fGhxi-X1WpHykWw/exec';
 
-const GAS_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwkCkHB13kZLE2vTad10HD1x8bgUxcmMqhq2V0qnbOpiQTxv-lgV-1fGhxi-X1WpHykWw/exec';
+    const CHUNK_MS = 30000;
+    const MAX_UPLOAD_RETRY = 3;
+    const UPLOAD_RETRY_BASE_MS = 5000;
 
-const state = {
-  mediaStream: null,
-  mediaRecorder: null,
-  isRecording: false,
-  isStopping: false,
-  sessionId: '',
-  meetingTitle: '',
-  startedAt: null,
-  startedAtText: '',
-  chunkIndex: 0,
-  uploadQueue: [],
-  uploading: false,
-  uploadedCount: 0,
-  failedCount: 0,
-  timerInterval: null,
-  currentMimeType: '',
-  finalizeDone: false
-};
+    let mediaStream = null;
+    let mediaRecorder = null;
+    let sessionId = '';
+    let chunkIndex = 0;
+    let isRecording = false;
+    let isStopping = false;
+    let selectedMimeType = '';
+    let timerInterval = null;
+    let recordingStartedAt = null;
+    let uploadedChunkCount = 0;
+    let pendingUploads = [];
 
-const el = {
-  meetingTitle: document.getElementById('meetingTitle'),
-  segmentSeconds: document.getElementById('segmentSeconds'),
-  audioBits: document.getElementById('audioBits'),
-  healthBtn: document.getElementById('healthBtn'),
-  resetBtn: document.getElementById('resetBtn'),
-  startBtn: document.getElementById('startBtn'),
-  stopBtn: document.getElementById('stopBtn'),
-  timer: document.getElementById('timer'),
-  status: document.getElementById('status'),
-  meterBar: document.getElementById('meterBar'),
-  resultArea: document.getElementById('resultArea'),
-  log: document.getElementById('log')
-};
+    const meetingTitleInput = document.getElementById('meetingTitle');
+    const extraPromptInput = document.getElementById('extraPrompt');
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const resetButton = document.getElementById('resetButton');
+    const healthButton = document.getElementById('healthButton');
+    const debugArea = document.getElementById('debugArea');
+    const timerEl = document.getElementById('timer');
+    const statusEl = document.getElementById('status');
+    const progressBar = document.getElementById('progressBar');
+    const logBox = document.getElementById('logBox');
+    const docLinkArea = document.getElementById('docLinkArea');
 
-el.healthBtn.addEventListener('click', healthCheck);
-el.resetBtn.addEventListener('click', resetScreen);
-el.startBtn.addEventListener('click', startRecording);
-el.stopBtn.addEventListener('click', stopRecordingAndFinalize);
+    init();
 
-window.addEventListener('beforeunload', function(e) {
-  if (state.isRecording || state.uploading || state.uploadQueue.length > 0) {
-    e.preventDefault();
-    e.returnValue = '';
-  }
-});
+    function init() {
+      const params = new URLSearchParams(location.search);
+      const debug = params.get('debug') === '1';
 
-function validateGasUrl() {
-  if (!GAS_WEB_APP_URL || GAS_WEB_APP_URL.indexOf('https://') !== 0 || GAS_WEB_APP_URL.indexOf('ここに') !== -1) {
-    throw new Error('GAS_WEB_APP_URL が未設定です。GASのWebアプリURLを recorder.html に貼り付けてください。');
-  }
-}
-
-async function healthCheck() {
-  try {
-    validateGasUrl();
-    setStatus('GAS接続テスト中...', 'warn');
-
-    const res = await postToGas({
-      action: 'health'
-    });
-
-    if (!res.ok) {
-      throw new Error(res.error || 'GAS接続テストに失敗しました。');
-    }
-
-    setStatus(
-      'GAS接続OK\n' +
-      'フォルダ: ' + res.folderName + '\n' +
-      'モデル: ' + res.model,
-      'ok'
-    );
-
-    addLog('GAS接続テスト成功: ' + JSON.stringify(res));
-
-  } catch (err) {
-    setStatus('GAS接続エラー: ' + err.message, 'error');
-    addLog('GAS接続エラー: ' + err.stack);
-  }
-}
-
-async function startRecording() {
-  try {
-    validateGasUrl();
-
-    const title = el.meetingTitle.value.trim();
-    if (!title) {
-      alert('議事録名を入力してください。');
-      return;
-    }
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      throw new Error('このブラウザは getUserMedia に対応していません。Chrome最新版で開いてください。');
-    }
-
-    state.sessionId = createSessionId();
-    state.meetingTitle = title;
-    state.startedAt = new Date();
-    state.startedAtText = formatDateTimeForFile(state.startedAt);
-    state.chunkIndex = 0;
-    state.uploadQueue = [];
-    state.uploadedCount = 0;
-    state.failedCount = 0;
-    state.isRecording = true;
-    state.isStopping = false;
-    state.finalizeDone = false;
-
-    el.resultArea.innerHTML = '';
-    el.startBtn.disabled = true;
-    el.stopBtn.disabled = false;
-    el.meetingTitle.disabled = true;
-    el.segmentSeconds.disabled = true;
-    el.audioBits.disabled = true;
-
-    setStatus('マイク許可を確認中...', 'warn');
-
-    state.mediaStream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-        channelCount: 1
-      },
-      video: false
-    });
-
-    state.currentMimeType = chooseSupportedMimeType();
-
-    if (!state.currentMimeType) {
-      throw new Error('このブラウザで利用可能な録音形式が見つかりません。');
-    }
-
-    addLog('録音形式: ' + state.currentMimeType);
-    setStatus('録音中...', 'ok');
-
-    startTimer();
-    startNextSegment();
-
-  } catch (err) {
-    await cleanupRecording();
-    setStatus('録音開始に失敗しました: ' + err.message, 'error');
-    addLog('録音開始エラー: ' + err.stack);
-    restoreControls();
-  }
-}
-
-function startNextSegment() {
-  if (!state.isRecording || state.isStopping) return;
-
-  const bits = Number(el.audioBits.value || 48000);
-  const segmentMs = Number(el.segmentSeconds.value || 60) * 1000;
-
-  const chunks = [];
-
-  let options = {
-    mimeType: state.currentMimeType,
-    audioBitsPerSecond: bits
-  };
-
-  try {
-    state.mediaRecorder = new MediaRecorder(state.mediaStream, options);
-  } catch (err) {
-    addLog('指定mimeTypeでMediaRecorder作成失敗。mimeType指定なしで再試行: ' + err.message);
-    state.mediaRecorder = new MediaRecorder(state.mediaStream, {
-      audioBitsPerSecond: bits
-    });
-    state.currentMimeType = state.mediaRecorder.mimeType || state.currentMimeType;
-  }
-
-  const thisChunkIndex = state.chunkIndex++;
-
-  state.mediaRecorder.ondataavailable = function(event) {
-    if (event.data && event.data.size > 0) {
-      chunks.push(event.data);
-    }
-  };
-
-  state.mediaRecorder.onerror = function(event) {
-    addLog('MediaRecorderエラー: ' + JSON.stringify(event));
-  };
-
-  state.mediaRecorder.onstop = async function() {
-    try {
-      const blob = new Blob(chunks, {
-        type: state.mediaRecorder.mimeType || state.currentMimeType
-      });
-
-      if (blob.size > 0) {
-        enqueueUpload({
-          chunkIndex: thisChunkIndex,
-          blob: blob,
-          mimeType: blob.type || state.currentMimeType
-        });
-      } else {
-        addLog('空の録音チャンクをスキップ: ' + thisChunkIndex);
+      if (debug) {
+        debugArea.classList.remove('hidden');
       }
 
-    } catch (err) {
-      state.failedCount++;
-      addLog('チャンク生成エラー: ' + err.stack);
+      startButton.addEventListener('click', startRecording);
+      stopButton.addEventListener('click', stopRecordingAndFinalize);
+      resetButton.addEventListener('click', resetScreen);
+
+      if (healthButton) {
+        healthButton.addEventListener('click', healthCheck);
+      }
+
+      showInitialGuidance();
+      setStatus('待機中です。', 'idle');
+      log('初期化完了');
     }
 
-    if (state.isRecording && !state.isStopping) {
-      startNextSegment();
-    }
-  };
+    function showInitialGuidance() {
+      if (isIOS()) {
+        log('iPhone/iPad判定: true');
+      } else {
+        log('iPhone/iPad判定: false');
+      }
 
-  state.mediaRecorder.start();
+      if (!window.isSecureContext) {
+        setStatus(
+          'このページは安全なHTTPS環境ではありません。マイク録音が使えない可能性があります。',
+          'danger'
+        );
+      }
 
-  addLog('チャンク録音開始: ' + thisChunkIndex);
-
-  setTimeout(function() {
-    if (
-      state.mediaRecorder &&
-      state.mediaRecorder.state === 'recording' &&
-      state.isRecording &&
-      !state.isStopping
-    ) {
-      state.mediaRecorder.stop();
-    }
-  }, segmentMs);
-}
-
-async function stopRecordingAndFinalize() {
-  try {
-    state.isStopping = true;
-    state.isRecording = false;
-
-    el.stopBtn.disabled = true;
-    setStatus('録音停止中。残りデータをアップロードしています...', 'warn');
-
-    if (state.mediaRecorder && state.mediaRecorder.state === 'recording') {
-      state.mediaRecorder.stop();
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        setStatus(
+          'このブラウザはマイク録音に対応していません。ChromeまたはSafariの最新版で開いてください。',
+          'danger'
+        );
+      }
     }
 
-    if (state.mediaStream) {
-      state.mediaStream.getTracks().forEach(function(track) {
-        track.stop();
+    async function startRecording() {
+      try {
+        if (isRecording) return;
+
+        clearDocLink();
+
+        const title = meetingTitleInput.value.trim();
+        if (!title) {
+          setStatus('議事録名を入力してください。', 'warning');
+          meetingTitleInput.focus();
+          return;
+        }
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          throw new Error('このブラウザはマイク録音に対応していません。');
+        }
+
+        setStatus('マイク権限を確認中です。', 'warning');
+
+        selectedMimeType = getSupportedMimeType();
+        log('選択mimeType: ' + selectedMimeType);
+
+        mediaStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          }
+        });
+
+        sessionId = createSessionId();
+        chunkIndex = 0;
+        uploadedChunkCount = 0;
+        pendingUploads = [];
+        isRecording = true;
+        isStopping = false;
+
+        const options = selectedMimeType ? { mimeType: selectedMimeType } : {};
+        mediaRecorder = new MediaRecorder(mediaStream, options);
+
+        mediaRecorder.addEventListener('dataavailable', function(event) {
+          if (event.data && event.data.size > 0) {
+            const currentIndex = chunkIndex++;
+            log('chunk生成: ' + currentIndex + ', size=' + event.data.size);
+            const uploadPromise = uploadChunkWithRetry(event.data, currentIndex);
+            pendingUploads.push(uploadPromise);
+          }
+        });
+
+        mediaRecorder.addEventListener('stop', function() {
+          log('MediaRecorder stop');
+        });
+
+        mediaRecorder.start(CHUNK_MS);
+
+        recordingStartedAt = Date.now();
+        startTimer();
+
+        startButton.disabled = true;
+        stopButton.disabled = false;
+        meetingTitleInput.disabled = true;
+        extraPromptInput.disabled = true;
+
+        setProgress(10);
+        setStatus('録音中です。録音停止後に議事録を作成します。', 'success');
+        log('録音開始 sessionId=' + sessionId);
+
+      } catch (err) {
+        handleRecordingStartError(err);
+      }
+    }
+
+    async function stopRecordingAndFinalize() {
+      try {
+        if (!isRecording || isStopping) return;
+
+        isStopping = true;
+        stopButton.disabled = true;
+        setStatus('録音を停止しています。画面を閉じないでください。', 'warning');
+        setProgress(35);
+
+        stopTimer();
+
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+
+        stopMediaTracks();
+
+        isRecording = false;
+
+        await wait(1500);
+
+        setStatus('音声アップロードの完了を確認しています。', 'warning');
+        setProgress(55);
+
+        await Promise.allSettled(pendingUploads);
+
+        setStatus('議事録を作成中です。Gemini APIで解析しています。', 'warning');
+        setProgress(75);
+
+        const result = await callGas({
+          action: 'finalize',
+          sessionId: sessionId,
+          meetingTitle: meetingTitleInput.value.trim(),
+          extraPrompt: extraPromptInput.value.trim()
+        });
+
+        if (!result.ok) {
+          throw new Error(result.error || 'finalizeに失敗しました。');
+        }
+
+        setProgress(100);
+        setStatus('議事録作成が完了しました。', 'success');
+        showDocLink(result.docUrl);
+        log('議事録作成完了: ' + result.docUrl);
+
+        await wait(1200);
+
+        resetToInitialAfterSuccess();
+
+      } catch (err) {
+        setProgress(90);
+        const message = String(err && err.message ? err.message : err);
+        setStatus('停止後処理エラー: ' + simplifyErrorMessage(message), 'danger');
+        log('停止後処理エラー: ' + message);
+        stopButton.disabled = false;
+      }
+    }
+
+    async function uploadChunkWithRetry(blob, currentIndex) {
+      for (let attempt = 1; attempt <= MAX_UPLOAD_RETRY; attempt++) {
+        try {
+          await uploadChunk(blob, currentIndex);
+          uploadedChunkCount++;
+          log('アップロード成功 chunk=' + currentIndex);
+          return true;
+
+        } catch (err) {
+          const message = String(err && err.message ? err.message : err);
+          log('リトライ対象エラー chunk=' + currentIndex + ', attempt=' + attempt + ': ' + message);
+
+          if (attempt >= MAX_UPLOAD_RETRY) {
+            log('アップロード失敗 chunk=' + currentIndex + ': ' + message);
+            throw err;
+          }
+
+          await wait(UPLOAD_RETRY_BASE_MS * attempt);
+        }
+      }
+
+      return false;
+    }
+
+    async function uploadChunk(blob, currentIndex) {
+      const base64Audio = await blobToBase64(blob);
+
+      const result = await callGas({
+        action: 'uploadChunk',
+        sessionId: sessionId,
+        meetingTitle: meetingTitleInput.value.trim(),
+        chunkIndex: currentIndex,
+        mimeType: blob.type || selectedMimeType || 'audio/webm',
+        base64Audio: base64Audio
       });
+
+      if (!result.ok) {
+        throw new Error(result.error || 'chunk upload failed');
+      }
+
+      return result;
     }
 
-    stopTimer();
+    async function healthCheck() {
+      try {
+        setStatus('GAS接続テスト中です。', 'warning');
 
-    await waitForUploadsToFinish();
+        const result = await callGas({
+          action: 'healthCheck'
+        });
 
-    setStatus('議事録を作成中...', 'warn');
+        if (!result.ok) {
+          throw new Error(result.error || 'healthCheck failed');
+        }
 
-    const finalizeRes = await postToGas({
-      action: 'finalize',
-      sessionId: state.sessionId,
-      meetingTitle: state.meetingTitle,
-      startedAtText: state.startedAtText,
-      clientInfo: getClientInfo()
-    });
+        setStatus('GAS接続テスト成功', 'success');
+        log('GAS接続テスト成功: ' + JSON.stringify(result));
 
-    if (!finalizeRes.ok) {
-      throw new Error(finalizeRes.error || '議事録作成に失敗しました。');
+      } catch (err) {
+        setStatus('GAS接続テスト失敗: ' + String(err.message || err), 'danger');
+        log('GAS接続テスト失敗: ' + String(err.message || err));
+      }
     }
 
-    state.finalizeDone = true;
+    async function callGas(payload) {
+      const res = await fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'cors',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8'
+        },
+        body: JSON.stringify(payload)
+      });
 
-    setStatus(
-      '完了\n' +
-      '音声チャンク: ' + finalizeRes.audioChunks + '\n' +
-      '文字起こしチャンク: ' + finalizeRes.transcriptChunks + '\n' +
-      'エラー数: ' + finalizeRes.errorFiles,
-      finalizeRes.errorFiles > 0 ? 'warn' : 'ok'
-    );
-
-    showResult(finalizeRes.documentUrl);
-    addLog('議事録作成完了: ' + JSON.stringify(finalizeRes));
-
-  } catch (err) {
-    setStatus('停止後処理エラー: ' + err.message, 'error');
-    addLog('停止後処理エラー: ' + err.stack);
-
-  } finally {
-    await cleanupRecording();
-    restoreControls();
-  }
-}
-
-function enqueueUpload(item) {
-  state.uploadQueue.push(item);
-  addLog('アップロード待ち追加: chunk=' + item.chunkIndex + ', size=' + item.blob.size);
-  processUploadQueue();
-}
-
-async function processUploadQueue() {
-  if (state.uploading) return;
-  state.uploading = true;
-
-  try {
-    while (state.uploadQueue.length > 0) {
-      const item = state.uploadQueue.shift();
+      const text = await res.text();
 
       try {
-        await uploadChunkWithRetry(item, 3);
-        state.uploadedCount++;
-      } catch (err) {
-        state.failedCount++;
-        addLog('アップロード失敗 chunk=' + item.chunkIndex + ': ' + err.stack);
+        return JSON.parse(text);
+      } catch (e) {
+        throw new Error('GAS応答をJSON解析できません: ' + text);
       }
-
-      updateProgress();
     }
-  } finally {
-    state.uploading = false;
-  }
-}
 
-async function uploadChunkWithRetry(item, maxRetry) {
-  let lastError = null;
+    function getSupportedMimeType() {
+      const candidates = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/aac',
+        'audio/ogg;codecs=opus'
+      ];
 
-  for (let attempt = 1; attempt <= maxRetry; attempt++) {
-    try {
-      setStatus(
-        'アップロード中...\n' +
-        'チャンク: ' + item.chunkIndex + '\n' +
-        '試行: ' + attempt + '/' + maxRetry,
-        'warn'
-      );
-
-      const audioBase64 = await blobToBase64(item.blob);
-
-      const res = await postToGas({
-        action: 'uploadChunk',
-        sessionId: state.sessionId,
-        meetingTitle: state.meetingTitle,
-        startedAtText: state.startedAtText,
-        chunkIndex: item.chunkIndex,
-        mimeType: item.mimeType,
-        audioBase64: audioBase64,
-        clientInfo: getClientInfo()
-      });
-
-      if (!res.ok) {
-        throw new Error(res.error || 'GAS側でアップロード処理に失敗しました。');
+      if (!window.MediaRecorder) {
+        throw new Error('MediaRecorderに対応していません。');
       }
 
-      if (!res.geminiOk) {
-        addLog(
-          '音声保存成功・Gemini文字起こし失敗 chunk=' +
-          item.chunkIndex +
-          ': ' +
-          res.geminiError
+      for (let i = 0; i < candidates.length; i++) {
+        const type = candidates[i];
+        if (MediaRecorder.isTypeSupported(type)) {
+          return type;
+        }
+      }
+
+      return '';
+    }
+
+    function handleRecordingStartError(err) {
+      const raw = String(err && err.message ? err.message : err);
+      let message = raw;
+
+      if (
+        raw.indexOf('Permission denied') !== -1 ||
+        raw.indexOf('not allowed') !== -1 ||
+        raw.indexOf('NotAllowedError') !== -1 ||
+        raw.indexOf('denied permission') !== -1
+      ) {
+        message =
+          '録音開始に失敗しました。\n\n' +
+          'マイク権限がOFFの可能性があります。\n\n' +
+          'iPhoneの場合:\n' +
+          '設定 → Chrome または Safari → マイク → ON\n\n' +
+          'その後、このページを再読み込みしてください。\n\n' +
+          '詳細: ' + raw;
+      }
+
+      setStatus(message, 'danger');
+      log('録音開始エラー: ' + raw);
+
+      cleanupAfterError();
+    }
+
+    function simplifyErrorMessage(message) {
+      if (message.indexOf('HTTP 429') !== -1 || message.indexOf('RESOURCE_EXHAUSTED') !== -1) {
+        return (
+          'Gemini APIの利用上限に達しました。\n' +
+          '少し時間を置いて再実行してください。\n\n' +
+          '無料枠では長時間会議や連続利用で発生します。\n\n' +
+          message
         );
-      } else {
-        addLog('アップロード・文字起こし成功 chunk=' + item.chunkIndex);
       }
 
-      return res;
+      if (message.indexOf('Load failed') !== -1) {
+        return (
+          '通信エラーが発生しました。\n' +
+          '通信状態を確認し、画面を閉じずに再実行してください。\n\n' +
+          message
+        );
+      }
 
-    } catch (err) {
-      lastError = err;
-      addLog('リトライ対象エラー chunk=' + item.chunkIndex + ', attempt=' + attempt + ': ' + err.message);
-      await sleep(1200 * attempt);
+      return message;
     }
-  }
 
-  throw lastError;
-}
+    function blobToBase64(blob) {
+      return new Promise(function(resolve, reject) {
+        const reader = new FileReader();
 
-async function waitForUploadsToFinish() {
-  while (state.uploading || state.uploadQueue.length > 0) {
-    setStatus(
-      'アップロード完了待ち...\n' +
-      '残り: ' + state.uploadQueue.length + '\n' +
-      '完了: ' + state.uploadedCount + '\n' +
-      '失敗: ' + state.failedCount,
-      'warn'
-    );
-    await sleep(800);
-  }
-}
+        reader.onloadend = function() {
+          const result = String(reader.result || '');
+          const base64 = result.split(',')[1] || '';
+          resolve(base64);
+        };
 
-async function postToGas(payload) {
-  const res = await fetch(GAS_WEB_APP_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'text/plain;charset=utf-8'
-    },
-    body: JSON.stringify(payload),
-    redirect: 'follow'
-  });
+        reader.onerror = function() {
+          reject(new Error('音声データのBase64変換に失敗しました。'));
+        };
 
-  const text = await res.text();
-
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    throw new Error('GASレスポンスをJSON解析できません: ' + text.substring(0, 500));
-  }
-}
-
-function chooseSupportedMimeType() {
-  const candidates = [
-    'audio/mp4',
-    'audio/aac',
-    'audio/ogg;codecs=opus',
-    'audio/webm;codecs=opus',
-    'audio/webm'
-  ];
-
-  if (!window.MediaRecorder || !MediaRecorder.isTypeSupported) {
-    return '';
-  }
-
-  for (const type of candidates) {
-    if (MediaRecorder.isTypeSupported(type)) {
-      return type;
-    }
-  }
-
-  return '';
-}
-
-function blobToBase64(blob) {
-  return new Promise(function(resolve, reject) {
-    const reader = new FileReader();
-
-    reader.onloadend = function() {
-      const dataUrl = reader.result;
-      const base64 = String(dataUrl).split(',')[1];
-      resolve(base64);
-    };
-
-    reader.onerror = function() {
-      reject(new Error('BlobのBase64変換に失敗しました。'));
-    };
-
-    reader.readAsDataURL(blob);
-  });
-}
-
-function startTimer() {
-  stopTimer();
-
-  state.timerInterval = setInterval(function() {
-    if (!state.startedAt) return;
-
-    const diff = Date.now() - state.startedAt.getTime();
-    const totalSec = Math.floor(diff / 1000);
-    const h = Math.floor(totalSec / 3600);
-    const m = Math.floor((totalSec % 3600) / 60);
-    const s = totalSec % 60;
-
-    el.timer.textContent =
-      String(h).padStart(2, '0') + ':' +
-      String(m).padStart(2, '0') + ':' +
-      String(s).padStart(2, '0');
-  }, 500);
-}
-
-function stopTimer() {
-  if (state.timerInterval) {
-    clearInterval(state.timerInterval);
-    state.timerInterval = null;
-  }
-}
-
-async function cleanupRecording() {
-  try {
-    if (state.mediaRecorder && state.mediaRecorder.state === 'recording') {
-      state.mediaRecorder.stop();
-    }
-  } catch (err) {}
-
-  try {
-    if (state.mediaStream) {
-      state.mediaStream.getTracks().forEach(function(track) {
-        track.stop();
+        reader.readAsDataURL(blob);
       });
     }
-  } catch (err) {}
 
-  state.mediaRecorder = null;
-  state.mediaStream = null;
-  state.isRecording = false;
-  state.isStopping = false;
-}
+    function createSessionId() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+      const rand = Math.random().toString(36).slice(2, 8);
+      return 'session_' + y + m + d + '_' + hh + mm + ss + '_' + rand;
+    }
 
-function restoreControls() {
-  el.startBtn.disabled = false;
-  el.stopBtn.disabled = true;
-  el.meetingTitle.disabled = false;
-  el.segmentSeconds.disabled = false;
-  el.audioBits.disabled = false;
-}
+    function startTimer() {
+      stopTimer();
 
-function resetScreen() {
-  if (state.isRecording || state.uploading || state.uploadQueue.length > 0) {
-    alert('録音中またはアップロード中はリセットできません。');
-    return;
-  }
+      timerInterval = setInterval(function() {
+        if (!recordingStartedAt) return;
 
-  el.timer.textContent = '00:00:00';
-  el.status.className = 'status';
-  el.status.textContent = '待機中';
-  el.meterBar.style.width = '0%';
-  el.resultArea.innerHTML = '';
-  el.log.textContent = '';
-}
+        const sec = Math.floor((Date.now() - recordingStartedAt) / 1000);
+        timerEl.textContent = formatSeconds(sec);
+      }, 500);
+    }
 
-function setStatus(message, type) {
-  el.status.textContent = message;
-  el.status.className = 'status ' + (type || '');
-}
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
 
-function updateProgress() {
-  const total = state.uploadedCount + state.failedCount + state.uploadQueue.length + (state.uploading ? 1 : 0);
-  let percent = 0;
+    function formatSeconds(totalSeconds) {
+      const h = Math.floor(totalSeconds / 3600);
+      const m = Math.floor((totalSeconds % 3600) / 60);
+      const s = totalSeconds % 60;
 
-  if (state.chunkIndex > 0) {
-    percent = Math.min(100, Math.round((state.uploadedCount / state.chunkIndex) * 100));
-  }
+      return (
+        String(h).padStart(2, '0') + ':' +
+        String(m).padStart(2, '0') + ':' +
+        String(s).padStart(2, '0')
+      );
+    }
 
-  el.meterBar.style.width = percent + '%';
+    function stopMediaTracks() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(function(track) {
+          track.stop();
+        });
+      }
+      mediaStream = null;
+    }
 
-  if (state.isRecording) {
-    setStatus(
-      '録音中...\n' +
-      '録音チャンク: ' + state.chunkIndex + '\n' +
-      'アップロード完了: ' + state.uploadedCount + '\n' +
-      'アップロード待ち: ' + state.uploadQueue.length + '\n' +
-      '失敗: ' + state.failedCount,
-      'ok'
-    );
-  }
-}
+    function cleanupAfterError() {
+      try {
+        if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      } catch (e) {}
 
-function showResult(url) {
-  el.resultArea.innerHTML =
-    '<a class="success-link" target="_blank" rel="noopener" href="' +
-    escapeHtml(url) +
-    '">作成されたGoogleドキュメントを開く</a>';
-}
+      stopMediaTracks();
+      stopTimer();
 
-function addLog(message) {
-  const now = new Date().toLocaleString('ja-JP');
-  el.log.textContent += '[' + now + '] ' + message + '\n';
-  el.log.scrollTop = el.log.scrollHeight;
-}
+      isRecording = false;
+      isStopping = false;
 
-function createSessionId() {
-  return 's' + Date.now() + '_' + Math.random().toString(36).substring(2, 10);
-}
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      meetingTitleInput.disabled = false;
+      extraPromptInput.disabled = false;
+    }
 
-function formatDateTimeForFile(date) {
-  const y = date.getFullYear();
-  const mo = String(date.getMonth() + 1).padStart(2, '0');
-  const d = String(date.getDate()).padStart(2, '0');
-  const h = String(date.getHours()).padStart(2, '0');
-  const mi = String(date.getMinutes()).padStart(2, '0');
-  const s = String(date.getSeconds()).padStart(2, '0');
+    function resetScreen() {
+      if (isRecording) {
+        const ok = confirm('録音中です。画面をリセットすると録音が中断されます。リセットしますか？');
+        if (!ok) return;
+      }
 
-  return y + mo + d + '_' + h + mi + s;
-}
+      cleanupAfterError();
 
-function getClientInfo() {
-  return {
-    userAgent: navigator.userAgent,
-    platform: navigator.platform,
-    language: navigator.language,
-    mimeType: state.currentMimeType,
-    pageUrl: location.href
-  };
-}
+      sessionId = '';
+      chunkIndex = 0;
+      uploadedChunkCount = 0;
+      pendingUploads = [];
+      selectedMimeType = '';
+      recordingStartedAt = null;
 
-function sleep(ms) {
-  return new Promise(function(resolve) {
-    setTimeout(resolve, ms);
-  });
-}
+      meetingTitleInput.value = '';
+      extraPromptInput.value = '';
+      timerEl.textContent = '00:00:00';
+      setProgress(0);
+      setStatus('待機中です。', 'idle');
+      clearDocLink();
 
-function escapeHtml(str) {
-  return String(str)
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
-</script>
+      log('画面リセット');
+    }
+
+    function resetToInitialAfterSuccess() {
+      cleanupAfterError();
+
+      sessionId = '';
+      chunkIndex = 0;
+      uploadedChunkCount = 0;
+      pendingUploads = [];
+      selectedMimeType = '';
+      recordingStartedAt = null;
+
+      meetingTitleInput.value = '';
+      extraPromptInput.value = '';
+      timerEl.textContent = '00:00:00';
+      setProgress(0);
+      setStatus('保存完了。次の録音を開始できます。', 'success');
+
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      meetingTitleInput.disabled = false;
+      extraPromptInput.disabled = false;
+
+      log('保存完了後、初期画面へ戻しました');
+    }
+
+    function setStatus(message, type) {
+      statusEl.textContent = message;
+      statusEl.className = 'status';
+
+      if (type === 'success') {
+        statusEl.classList.add('status-success');
+      } else if (type === 'warning') {
+        statusEl.classList.add('status-warning');
+      } else if (type === 'danger') {
+        statusEl.classList.add('status-danger');
+      } else {
+        statusEl.classList.add('status-idle');
+      }
+    }
+
+    function setProgress(percent) {
+      const p = Math.max(0, Math.min(100, Number(percent) || 0));
+      progressBar.style.width = p + '%';
+    }
+
+    function showDocLink(url) {
+      if (!url) return;
+
+      docLinkArea.innerHTML = '';
+      const a = document.createElement('a');
+      a.href = url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.textContent = '作成した議事録を開く';
+      docLinkArea.appendChild(a);
+      docLinkArea.classList.remove('hidden');
+    }
+
+    function clearDocLink() {
+      docLinkArea.innerHTML = '';
+      docLinkArea.classList.add('hidden');
+    }
+
+    function log(message) {
+      const now = new Date();
+      const stamp =
+        '[' +
+        now.getFullYear() + '/' +
+        String(now.getMonth() + 1).padStart(2, '0') + '/' +
+        String(now.getDate()).padStart(2, '0') + ' ' +
+        String(now.getHours()).padStart(2, '0') + ':' +
+        String(now.getMinutes()).padStart(2, '0') + ':' +
+        String(now.getSeconds()).padStart(2, '0') +
+        '] ';
+
+      logBox.textContent += stamp + message + '\n';
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function isIOS() {
+      return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+        (
+          navigator.platform === 'MacIntel' &&
+          navigator.maxTouchPoints > 1
+        );
+    }
+
+    function wait(ms) {
+      return new Promise(function(resolve) {
+        setTimeout(resolve, ms);
+      });
+    }
+
+    window.addEventListener('beforeunload', function(e) {
+      if (isRecording || isStopping) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
+  </script>
 </body>
 </html>
