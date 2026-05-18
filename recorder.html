@@ -207,6 +207,47 @@
       margin-top: 10px;
     }
 
+    .memo-list {
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 12px;
+      background: #f8fafc;
+      max-height: 220px;
+      overflow-y: auto;
+      font-size: 14px;
+    }
+
+    .memo-item {
+      border-bottom: 1px solid #dce3ea;
+      padding: 8px 0;
+    }
+
+    .memo-item:last-child {
+      border-bottom: none;
+    }
+
+    .memo-time {
+      font-weight: 900;
+      color: var(--blue);
+    }
+
+    .memo-important {
+      color: var(--red);
+      font-weight: 900;
+    }
+
+    .memo-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .memo-row input[type="checkbox"] {
+      width: auto;
+      transform: scale(1.3);
+    }
+
     .note {
       color: #555;
       font-weight: 600;
@@ -281,6 +322,31 @@
     </div>
 
     <div class="card">
+      <h2>録音中メモ</h2>
+
+      <div class="field">
+        <label for="manualMemoInput">手打ちメモ</label>
+        <textarea id="manualMemoInput" placeholder="例：山田さん、A-81、5月20日納品、見積再提出"></textarea>
+      </div>
+
+      <div class="memo-row">
+        <input type="checkbox" id="importantMemoCheck">
+        <label for="importantMemoCheck" style="margin:0;">重要メモとして追加</label>
+      </div>
+
+      <button id="addMemoButton" class="button button-blue" type="button">
+        現在時刻でメモ追加
+      </button>
+
+      <button id="clearMemoButton" class="button button-gray" type="button">
+        メモ全削除
+      </button>
+
+      <label>追加済みメモ</label>
+      <div id="memoList" class="memo-list">メモはまだありません。</div>
+    </div>
+
+    <div class="card">
       <h2>ログ</h2>
       <div id="logBox" class="log-box"></div>
     </div>
@@ -290,6 +356,7 @@
       <ul class="note">
         <li>iPhone/iPad/Androidでは、ChromeまたはSafariの通常ブラウザで開いてください。</li>
         <li>LINE等のアプリ内ブラウザでは使用しないでください。</li>
+        <li>録音中メモは、追加ボタンを押した時点の録音時間と一緒に保存されます。</li>
         <li>録音中は画面ロック・ブラウザ切替を避けてください。</li>
         <li>録音停止後、議事録作成完了まで画面を閉じないでください。</li>
       </ul>
@@ -316,6 +383,7 @@
     let timerInterval = null;
     let recordingStartedAt = null;
     let pendingUploads = [];
+    let manualMemos = [];
 
     const meetingTitleInput = document.getElementById('meetingTitle');
     const extraPromptInput = document.getElementById('extraPrompt');
@@ -330,6 +398,12 @@
     const progressBar = document.getElementById('progressBar');
     const logBox = document.getElementById('logBox');
     const docLinkArea = document.getElementById('docLinkArea');
+
+    const manualMemoInput = document.getElementById('manualMemoInput');
+    const importantMemoCheck = document.getElementById('importantMemoCheck');
+    const addMemoButton = document.getElementById('addMemoButton');
+    const clearMemoButton = document.getElementById('clearMemoButton');
+    const memoList = document.getElementById('memoList');
 
     init();
 
@@ -346,11 +420,15 @@
       retryFinalizeButton.addEventListener('click', retryFinalize);
       resetButton.addEventListener('click', resetScreen);
 
+      addMemoButton.addEventListener('click', addManualMemo);
+      clearMemoButton.addEventListener('click', clearManualMemos);
+
       if (healthButton) {
         healthButton.addEventListener('click', healthCheck);
       }
 
       setStatus('待機中です。', 'idle');
+      renderMemoList();
       logDeviceInfo();
       log('初期化完了');
     }
@@ -426,7 +504,7 @@
         extraPromptInput.disabled = true;
 
         setProgress(5);
-        setStatus('録音中です。停止後に分割処理で議事録を作成します。', 'success');
+        setStatus('録音中です。必要に応じて手打ちメモを追加してください。', 'success');
         log('録音開始 sessionId=' + sessionId);
 
       } catch (err) {
@@ -495,6 +573,8 @@
     }
 
     async function runFinalizeLoop() {
+      saveSessionInfo();
+
       setStatus('議事録作成を開始します。分割処理中です。', 'warning');
       setProgress(45);
 
@@ -506,7 +586,8 @@
           action: 'finalizeStep',
           sessionId: sessionId,
           meetingTitle: meetingTitleInput.value.trim(),
-          extraPrompt: extraPromptInput.value.trim()
+          extraPrompt: extraPromptInput.value.trim(),
+          manualMemos: manualMemos
         }, MAX_FINALIZE_RETRY);
 
         if (!result.ok) {
@@ -522,7 +603,8 @@
         if (result.phase === 'transcribing') {
           setStatus(
             '文字起こし分割処理中です。\n' +
-            result.completedBatches + ' / ' + result.totalBatches + ' 完了',
+            result.completedBatches + ' / ' + result.totalBatches + ' 完了\n' +
+            '手打ちメモ数：' + (result.memoCount || manualMemos.length),
             'warning'
           );
 
@@ -547,6 +629,82 @@
 
       await wait(1200);
       resetToInitialAfterSuccess();
+    }
+
+    function addManualMemo() {
+      const memoText = manualMemoInput.value.trim();
+
+      if (!memoText) {
+        setStatus('メモ内容を入力してください。', 'warning');
+        manualMemoInput.focus();
+        return;
+      }
+
+      const seconds = getCurrentRecordingSeconds();
+      const time = formatSeconds(seconds);
+      const important = importantMemoCheck.checked;
+
+      manualMemos.push({
+        seconds: seconds,
+        time: time,
+        memo: memoText,
+        important: important,
+        createdAt: new Date().toISOString()
+      });
+
+      manualMemoInput.value = '';
+      importantMemoCheck.checked = false;
+
+      saveSessionInfo();
+      renderMemoList();
+
+      setStatus('メモを追加しました：' + time, 'success');
+      log('メモ追加 ' + time + ': ' + memoText);
+    }
+
+    function clearManualMemos() {
+      if (manualMemos.length === 0) return;
+
+      const ok = confirm('追加済みメモをすべて削除しますか？');
+      if (!ok) return;
+
+      manualMemos = [];
+      saveSessionInfo();
+      renderMemoList();
+
+      log('メモ全削除');
+    }
+
+    function renderMemoList() {
+      if (!manualMemos || manualMemos.length === 0) {
+        memoList.textContent = 'メモはまだありません。';
+        return;
+      }
+
+      memoList.innerHTML = '';
+
+      manualMemos.forEach(function(item, index) {
+        const div = document.createElement('div');
+        div.className = 'memo-item';
+
+        const importantText = item.important ? '<span class="memo-important">【重要】</span> ' : '';
+
+        div.innerHTML =
+          '<div><span class="memo-time">' + escapeHtml(item.time || '00:00:00') + '</span> ' +
+          importantText +
+          escapeHtml(item.memo || '') +
+          '</div>' +
+          '<button type="button" style="margin-top:6px;border:none;border-radius:8px;padding:6px 10px;background:#a62828;color:#fff;font-weight:700;" onclick="deleteMemo(' + index + ')">削除</button>';
+
+        memoList.appendChild(div);
+      });
+    }
+
+    function deleteMemo(index) {
+      manualMemos.splice(index, 1);
+      saveSessionInfo();
+      renderMemoList();
+      log('メモ削除 index=' + index);
     }
 
     async function uploadChunkWithRetry(blob, currentIndex) {
@@ -771,12 +929,14 @@
       localStorage.setItem('aiMeetingSessionId', sessionId || '');
       localStorage.setItem('aiMeetingTitle', meetingTitleInput.value.trim());
       localStorage.setItem('aiMeetingExtraPrompt', extraPromptInput.value.trim());
+      localStorage.setItem('aiMeetingManualMemos', JSON.stringify(manualMemos || []));
     }
 
     function restoreSessionInfo() {
       const savedSessionId = localStorage.getItem('aiMeetingSessionId') || '';
       const savedTitle = localStorage.getItem('aiMeetingTitle') || '';
       const savedExtraPrompt = localStorage.getItem('aiMeetingExtraPrompt') || '';
+      const savedMemos = localStorage.getItem('aiMeetingManualMemos') || '[]';
 
       if (savedSessionId) {
         sessionId = savedSessionId;
@@ -785,12 +945,25 @@
         retryFinalizeButton.classList.remove('hidden');
         log('前回セッションを復元: ' + sessionId);
       }
+
+      try {
+        manualMemos = JSON.parse(savedMemos);
+        if (!Array.isArray(manualMemos)) manualMemos = [];
+      } catch (e) {
+        manualMemos = [];
+      }
     }
 
     function clearSessionInfo() {
       localStorage.removeItem('aiMeetingSessionId');
       localStorage.removeItem('aiMeetingTitle');
       localStorage.removeItem('aiMeetingExtraPrompt');
+      localStorage.removeItem('aiMeetingManualMemos');
+    }
+
+    function getCurrentRecordingSeconds() {
+      if (!recordingStartedAt) return 0;
+      return Math.floor((Date.now() - recordingStartedAt) / 1000);
     }
 
     function startTimer() {
@@ -798,7 +971,7 @@
 
       timerInterval = setInterval(function() {
         if (!recordingStartedAt) return;
-        const sec = Math.floor((Date.now() - recordingStartedAt) / 1000);
+        const sec = getCurrentRecordingSeconds();
         timerEl.textContent = formatSeconds(sec);
       }, 500);
     }
@@ -863,11 +1036,14 @@
       pendingUploads = [];
       selectedMimeType = '';
       recordingStartedAt = null;
+      manualMemos = [];
 
       clearSessionInfo();
 
       meetingTitleInput.value = '';
       extraPromptInput.value = '';
+      manualMemoInput.value = '';
+      importantMemoCheck.checked = false;
       timerEl.textContent = '00:00:00';
 
       retryFinalizeButton.classList.add('hidden');
@@ -875,6 +1051,7 @@
       setProgress(0);
       setStatus('待機中です。', 'idle');
       clearDocLink();
+      renderMemoList();
 
       log('画面リセット');
     }
@@ -887,11 +1064,14 @@
       pendingUploads = [];
       selectedMimeType = '';
       recordingStartedAt = null;
+      manualMemos = [];
 
       clearSessionInfo();
 
       meetingTitleInput.value = '';
       extraPromptInput.value = '';
+      manualMemoInput.value = '';
+      importantMemoCheck.checked = false;
       timerEl.textContent = '00:00:00';
 
       retryFinalizeButton.classList.add('hidden');
@@ -903,6 +1083,8 @@
       stopButton.disabled = true;
       meetingTitleInput.disabled = false;
       extraPromptInput.disabled = false;
+
+      renderMemoList();
 
       log('保存完了後、初期画面へ戻しました');
     }
@@ -978,6 +1160,15 @@
 
     function isAndroid() {
       return /Android/i.test(navigator.userAgent);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     function wait(ms) {
