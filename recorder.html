@@ -2,25 +2,19 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
   <title>AI議事録作成アプリ</title>
 
   <style>
     :root {
       --main: #24577f;
-      --green: #10863b;
-      --green-dark: #08702f;
       --blue: #1f5f93;
-      --gray: #9aa6b2;
+      --green: #10863b;
+      --red: #a62828;
+      --gray: #667788;
       --bg: #f3f6f9;
       --card: #ffffff;
       --border: #d8e0e8;
-      --danger-bg: #fdeaea;
-      --danger: #9b1c1c;
-      --success-bg: #e8f7ed;
-      --success: #116b35;
-      --warning-bg: #fff6df;
-      --warning: #8a5a00;
       --text: #20262d;
     }
 
@@ -30,7 +24,6 @@
 
     body {
       margin: 0;
-      padding: 0;
       background: var(--bg);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -39,63 +32,57 @@
     }
 
     .app {
-      width: 100%;
       max-width: 960px;
       margin: 0 auto;
-      padding: 16px;
+      padding: 14px;
     }
 
     .header {
       background: linear-gradient(135deg, #1f5f93, #163e60);
       color: #fff;
       border-radius: 18px;
-      padding: 22px 20px;
-      margin-bottom: 16px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      padding: 20px;
+      margin-bottom: 14px;
     }
 
     .header h1 {
       margin: 0;
-      font-size: 26px;
-      line-height: 1.3;
+      font-size: 24px;
     }
 
     .header p {
-      margin: 8px 0 0;
-      font-size: 15px;
-      opacity: 0.92;
+      margin: 6px 0 0;
+      opacity: 0.9;
     }
 
     .card {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: 18px;
-      padding: 20px;
-      margin-bottom: 16px;
+      padding: 18px;
+      margin-bottom: 14px;
       box-shadow: 0 3px 10px rgba(0,0,0,0.04);
     }
 
     h2 {
-      margin: 0 0 14px;
-      font-size: 22px;
+      margin: 0 0 12px;
       color: var(--main);
+      font-size: 21px;
     }
 
     label {
       display: block;
-      font-weight: 700;
+      font-weight: 800;
       margin-bottom: 8px;
-      font-size: 17px;
     }
 
-    input[type="text"],
+    input,
     textarea {
       width: 100%;
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 14px;
       font-size: 17px;
-      background: #fff;
     }
 
     textarea {
@@ -104,71 +91,53 @@
     }
 
     .field {
-      margin-bottom: 18px;
+      margin-bottom: 16px;
     }
 
     .button {
       width: 100%;
       border: none;
       border-radius: 16px;
-      padding: 16px 18px;
-      font-size: 20px;
-      font-weight: 800;
+      padding: 16px;
+      margin-bottom: 12px;
+      font-size: 19px;
+      font-weight: 900;
       color: #fff;
       cursor: pointer;
-      margin-bottom: 14px;
-      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.15);
       touch-action: manipulation;
+      box-shadow: inset 0 -4px 0 rgba(0,0,0,0.16);
     }
 
     .button:disabled {
-      background: var(--gray) !important;
+      opacity: 0.65;
       cursor: not-allowed;
       box-shadow: none;
-      opacity: 0.85;
     }
 
-    .button-green {
-      background: var(--green);
-    }
+    .button-green { background: var(--green); }
+    .button-blue { background: var(--blue); }
+    .button-red { background: var(--red); }
+    .button-gray { background: var(--gray); }
 
-    .button-green:active {
-      background: var(--green-dark);
-    }
-
-    .button-blue {
-      background: var(--blue);
-    }
-
-    .button-gray {
-      background: #667788;
-    }
-
-    .button-red {
-      background: #a62828;
-    }
-
-    .button-small {
-      font-size: 16px;
-      padding: 12px;
-      border-radius: 12px;
+    .hidden {
+      display: none !important;
     }
 
     .timer {
       font-size: 30px;
-      font-weight: 800;
-      letter-spacing: 1px;
+      font-weight: 900;
       background: #eef3f7;
       border: 1px solid var(--border);
       border-radius: 16px;
-      padding: 20px;
-      margin-bottom: 18px;
+      padding: 18px;
+      margin-bottom: 14px;
+      text-align: center;
     }
 
     .status {
       border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 16px;
+      padding: 15px;
+      margin-bottom: 14px;
       font-weight: 800;
       white-space: pre-wrap;
       word-break: break-word;
@@ -177,25 +146,24 @@
     .status-idle {
       background: #eef3f7;
       border: 1px solid var(--border);
-      color: #26313b;
     }
 
     .status-success {
-      background: var(--success-bg);
+      background: #e8f7ed;
       border: 1px solid #b7e3c5;
-      color: var(--success);
+      color: #116b35;
     }
 
     .status-warning {
-      background: var(--warning-bg);
+      background: #fff6df;
       border: 1px solid #f2da99;
-      color: var(--warning);
+      color: #8a5a00;
     }
 
     .status-danger {
-      background: var(--danger-bg);
+      background: #fdeaea;
       border: 1px solid #efc0c0;
-      color: var(--danger);
+      color: #9b1c1c;
     }
 
     .progress-wrap {
@@ -204,81 +172,49 @@
       background: #dbe4ec;
       border-radius: 999px;
       overflow: hidden;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .progress-bar {
       height: 100%;
       width: 0%;
       background: var(--green);
-      transition: width 0.25s ease;
+      transition: width 0.25s;
     }
 
     .log-box {
       background: #101923;
       color: #eef5ff;
       border-radius: 16px;
-      padding: 16px;
-      min-height: 120px;
-      max-height: 260px;
+      padding: 14px;
+      min-height: 140px;
+      max-height: 300px;
       overflow-y: auto;
-      font-size: 14px;
+      font-size: 13px;
       white-space: pre-wrap;
       word-break: break-word;
     }
 
-    .note {
-      color: #666;
-      font-weight: 600;
-    }
-
     .link-area a {
       display: block;
+      text-align: center;
       color: #fff;
       background: var(--blue);
-      text-align: center;
       text-decoration: none;
       border-radius: 14px;
       padding: 14px;
-      font-size: 18px;
-      font-weight: 800;
-      margin-top: 12px;
+      font-weight: 900;
+      margin-top: 10px;
     }
 
-    .hidden {
-      display: none !important;
-    }
-
-    .debug {
-      border: 2px dashed #b5c2cf;
+    .note {
+      color: #555;
+      font-weight: 600;
     }
 
     ul {
       margin: 8px 0 0 20px;
       padding: 0;
-    }
-
-    @media (max-width: 600px) {
-      .app {
-        padding: 12px;
-      }
-
-      .header h1 {
-        font-size: 22px;
-      }
-
-      .card {
-        padding: 16px;
-      }
-
-      .button {
-        font-size: 18px;
-        padding: 15px;
-      }
-
-      .timer {
-        font-size: 28px;
-      }
     }
   </style>
 </head>
@@ -301,7 +237,7 @@
 
       <div class="field">
         <label for="extraPrompt">追加指示 任意</label>
-        <textarea id="extraPrompt" placeholder="例：決定事項と担当者を特に詳しく整理してください"></textarea>
+        <textarea id="extraPrompt" placeholder="例：決定事項と担当者を詳しく整理してください"></textarea>
       </div>
 
       <button id="resetButton" class="button button-gray" type="button">
@@ -309,9 +245,9 @@
       </button>
     </div>
 
-    <div id="debugArea" class="card debug hidden">
+    <div id="debugArea" class="card hidden">
       <h2>開発用</h2>
-      <button id="healthButton" class="button button-blue button-small" type="button">
+      <button id="healthButton" class="button button-blue" type="button">
         GAS接続テスト
       </button>
     </div>
@@ -325,6 +261,10 @@
 
       <button id="stopButton" class="button button-blue" type="button" disabled>
         録音停止・議事録作成
+      </button>
+
+      <button id="retryFinalizeButton" class="button button-red hidden" type="button">
+        議事録作成を再実行
       </button>
 
       <label>録音時間</label>
@@ -348,25 +288,23 @@
     <div class="card">
       <h2>注意事項</h2>
       <ul class="note">
-        <li>iPhone/iPadでは、設定 → ChromeまたはSafari → マイクをONにしてください。</li>
-        <li>録音中に画面ロックやブラウザ切替をすると録音が止まる場合があります。</li>
-        <li>通信が不安定な場合、録音停止後のアップロード完了まで画面を閉じないでください。</li>
-        <li>Gemini APIの無料枠では、長時間会議や連続利用で429エラーが出る場合があります。</li>
+        <li>iPhone/iPad/Androidでは、ChromeまたはSafariの通常ブラウザで開いてください。</li>
+        <li>LINE等のアプリ内ブラウザでは使用しないでください。</li>
+        <li>録音中は画面ロック・ブラウザ切替を避けてください。</li>
+        <li>録音停止後、議事録作成完了まで画面を閉じないでください。</li>
       </ul>
     </div>
 
   </div>
 
   <script>
-    /****************************************************
-     * AI議事録作成WEBアプリ HTML 完全版
-     ****************************************************/
-
     const GAS_URL = 'https://script.google.com/macros/s/AKfycbwkCkHB13kZLE2vTad10HD1x8bgUxcmMqhq2V0qnbOpiQTxv-lgV-1fGhxi-X1WpHykWw/exec';
 
-    const CHUNK_MS = 30000;
-    const MAX_UPLOAD_RETRY = 3;
+    const CHUNK_MS = 120000;
+    const MAX_UPLOAD_RETRY = 4;
+    const MAX_FINALIZE_RETRY = 5;
     const UPLOAD_RETRY_BASE_MS = 5000;
+    const FINALIZE_RETRY_BASE_MS = 10000;
 
     let mediaStream = null;
     let mediaRecorder = null;
@@ -377,13 +315,13 @@
     let selectedMimeType = '';
     let timerInterval = null;
     let recordingStartedAt = null;
-    let uploadedChunkCount = 0;
     let pendingUploads = [];
 
     const meetingTitleInput = document.getElementById('meetingTitle');
     const extraPromptInput = document.getElementById('extraPrompt');
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
+    const retryFinalizeButton = document.getElementById('retryFinalizeButton');
     const resetButton = document.getElementById('resetButton');
     const healthButton = document.getElementById('healthButton');
     const debugArea = document.getElementById('debugArea');
@@ -397,45 +335,24 @@
 
     function init() {
       const params = new URLSearchParams(location.search);
-      const debug = params.get('debug') === '1';
-
-      if (debug) {
+      if (params.get('debug') === '1') {
         debugArea.classList.remove('hidden');
       }
 
+      restoreSessionInfo();
+
       startButton.addEventListener('click', startRecording);
       stopButton.addEventListener('click', stopRecordingAndFinalize);
+      retryFinalizeButton.addEventListener('click', retryFinalize);
       resetButton.addEventListener('click', resetScreen);
 
       if (healthButton) {
         healthButton.addEventListener('click', healthCheck);
       }
 
-      showInitialGuidance();
       setStatus('待機中です。', 'idle');
+      logDeviceInfo();
       log('初期化完了');
-    }
-
-    function showInitialGuidance() {
-      if (isIOS()) {
-        log('iPhone/iPad判定: true');
-      } else {
-        log('iPhone/iPad判定: false');
-      }
-
-      if (!window.isSecureContext) {
-        setStatus(
-          'このページは安全なHTTPS環境ではありません。マイク録音が使えない可能性があります。',
-          'danger'
-        );
-      }
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        setStatus(
-          'このブラウザはマイク録音に対応していません。ChromeまたはSafariの最新版で開いてください。',
-          'danger'
-        );
-      }
     }
 
     async function startRecording() {
@@ -443,6 +360,7 @@
         if (isRecording) return;
 
         clearDocLink();
+        retryFinalizeButton.classList.add('hidden');
 
         const title = meetingTitleInput.value.trim();
         if (!title) {
@@ -453,6 +371,10 @@
 
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
           throw new Error('このブラウザはマイク録音に対応していません。');
+        }
+
+        if (!window.MediaRecorder) {
+          throw new Error('このブラウザはMediaRecorderに対応していません。');
         }
 
         setStatus('マイク権限を確認中です。', 'warning');
@@ -469,8 +391,9 @@
         });
 
         sessionId = createSessionId();
+        saveSessionInfo();
+
         chunkIndex = 0;
-        uploadedChunkCount = 0;
         pendingUploads = [];
         isRecording = true;
         isStopping = false;
@@ -482,8 +405,9 @@
           if (event.data && event.data.size > 0) {
             const currentIndex = chunkIndex++;
             log('chunk生成: ' + currentIndex + ', size=' + event.data.size);
-            const uploadPromise = uploadChunkWithRetry(event.data, currentIndex);
-            pendingUploads.push(uploadPromise);
+
+            const promise = uploadChunkWithRetry(event.data, currentIndex);
+            pendingUploads.push(promise);
           }
         });
 
@@ -501,8 +425,8 @@
         meetingTitleInput.disabled = true;
         extraPromptInput.disabled = true;
 
-        setProgress(10);
-        setStatus('録音中です。録音停止後に議事録を作成します。', 'success');
+        setProgress(5);
+        setStatus('録音中です。停止後に分割処理で議事録を作成します。', 'success');
         log('録音開始 sessionId=' + sessionId);
 
       } catch (err) {
@@ -516,8 +440,9 @@
 
         isStopping = true;
         stopButton.disabled = true;
+
         setStatus('録音を停止しています。画面を閉じないでください。', 'warning');
-        setProgress(35);
+        setProgress(20);
 
         stopTimer();
 
@@ -526,70 +451,122 @@
         }
 
         stopMediaTracks();
-
         isRecording = false;
 
-        await wait(1500);
+        await wait(2000);
 
-        setStatus('音声アップロードの完了を確認しています。', 'warning');
-        setProgress(55);
+        setStatus('音声アップロード完了を確認しています。', 'warning');
+        setProgress(35);
 
-        await Promise.allSettled(pendingUploads);
+        const uploadResults = await Promise.allSettled(pendingUploads);
+        const failedUploads = uploadResults.filter(function(r) {
+          return r.status === 'rejected';
+        });
 
-        setStatus('議事録を作成中です。Gemini APIで解析しています。', 'warning');
-        setProgress(75);
+        if (failedUploads.length > 0) {
+          throw new Error('一部の音声アップロードに失敗しました。通信状態を確認して再録音してください。');
+        }
 
-        const result = await callGas({
-          action: 'finalize',
+        await runFinalizeLoop();
+
+      } catch (err) {
+        handleFinalizeError(err);
+      }
+    }
+
+    async function retryFinalize() {
+      try {
+        if (!sessionId) {
+          setStatus('再実行できるセッションがありません。再録音してください。', 'danger');
+          return;
+        }
+
+        retryFinalizeButton.classList.add('hidden');
+        startButton.disabled = true;
+        stopButton.disabled = true;
+        meetingTitleInput.disabled = true;
+        extraPromptInput.disabled = true;
+
+        await runFinalizeLoop();
+
+      } catch (err) {
+        handleFinalizeError(err);
+      }
+    }
+
+    async function runFinalizeLoop() {
+      setStatus('議事録作成を開始します。分割処理中です。', 'warning');
+      setProgress(45);
+
+      let done = false;
+      let lastResult = null;
+
+      while (!done) {
+        const result = await callGasWithRetry({
+          action: 'finalizeStep',
           sessionId: sessionId,
           meetingTitle: meetingTitleInput.value.trim(),
           extraPrompt: extraPromptInput.value.trim()
-        });
+        }, MAX_FINALIZE_RETRY);
 
         if (!result.ok) {
-          throw new Error(result.error || 'finalizeに失敗しました。');
+          throw new Error(result.shortError || result.error || 'finalizeStepに失敗しました。');
         }
 
-        setProgress(100);
-        setStatus('議事録作成が完了しました。', 'success');
-        showDocLink(result.docUrl);
-        log('議事録作成完了: ' + result.docUrl);
+        lastResult = result;
 
-        await wait(1200);
+        if (result.progressPercent !== undefined) {
+          setProgress(Math.max(45, result.progressPercent));
+        }
 
-        resetToInitialAfterSuccess();
+        if (result.phase === 'transcribing') {
+          setStatus(
+            '文字起こし分割処理中です。\n' +
+            result.completedBatches + ' / ' + result.totalBatches + ' 完了',
+            'warning'
+          );
 
-      } catch (err) {
-        setProgress(90);
-        const message = String(err && err.message ? err.message : err);
-        setStatus('停止後処理エラー: ' + simplifyErrorMessage(message), 'danger');
-        log('停止後処理エラー: ' + message);
-        stopButton.disabled = false;
+          log('finalizeStep: ' + result.completedBatches + '/' + result.totalBatches);
+        }
+
+        if (result.done) {
+          done = true;
+          break;
+        }
+
+        await wait(1500);
       }
+
+      setProgress(100);
+      setStatus('議事録作成が完了しました。', 'success');
+
+      if (lastResult && lastResult.docUrl) {
+        showDocLink(lastResult.docUrl);
+        log('議事録作成完了: ' + lastResult.docUrl);
+      }
+
+      await wait(1200);
+      resetToInitialAfterSuccess();
     }
 
     async function uploadChunkWithRetry(blob, currentIndex) {
       for (let attempt = 1; attempt <= MAX_UPLOAD_RETRY; attempt++) {
         try {
           await uploadChunk(blob, currentIndex);
-          uploadedChunkCount++;
           log('アップロード成功 chunk=' + currentIndex);
           return true;
 
         } catch (err) {
-          const message = String(err && err.message ? err.message : err);
-          log('リトライ対象エラー chunk=' + currentIndex + ', attempt=' + attempt + ': ' + message);
+          const msg = String(err && err.message ? err.message : err);
+          log('アップロード失敗 chunk=' + currentIndex + ', attempt=' + attempt + ': ' + msg);
 
           if (attempt >= MAX_UPLOAD_RETRY) {
-            log('アップロード失敗 chunk=' + currentIndex + ': ' + message);
             throw err;
           }
 
           await wait(UPLOAD_RETRY_BASE_MS * attempt);
         }
       }
-
-      return false;
     }
 
     async function uploadChunk(blob, currentIndex) {
@@ -605,7 +582,7 @@
       });
 
       if (!result.ok) {
-        throw new Error(result.error || 'chunk upload failed');
+        throw new Error(result.shortError || result.error || 'chunk upload failed');
       }
 
       return result;
@@ -630,6 +607,33 @@
         setStatus('GAS接続テスト失敗: ' + String(err.message || err), 'danger');
         log('GAS接続テスト失敗: ' + String(err.message || err));
       }
+    }
+
+    async function callGasWithRetry(payload, maxRetry) {
+      let lastError = null;
+
+      for (let attempt = 1; attempt <= maxRetry; attempt++) {
+        try {
+          return await callGas(payload);
+        } catch (err) {
+          lastError = err;
+          log('通信リトライ attempt=' + attempt + ': ' + String(err.message || err));
+
+          if (attempt >= maxRetry) {
+            throw err;
+          }
+
+          setStatus(
+            '通信が一時的に失敗しました。自動再試行中です。\n' +
+            attempt + ' / ' + maxRetry,
+            'warning'
+          );
+
+          await wait(FINALIZE_RETRY_BASE_MS * attempt);
+        }
+      }
+
+      throw lastError;
     }
 
     async function callGas(payload) {
@@ -660,14 +664,9 @@
         'audio/ogg;codecs=opus'
       ];
 
-      if (!window.MediaRecorder) {
-        throw new Error('MediaRecorderに対応していません。');
-      }
-
       for (let i = 0; i < candidates.length; i++) {
-        const type = candidates[i];
-        if (MediaRecorder.isTypeSupported(type)) {
-          return type;
+        if (MediaRecorder.isTypeSupported(candidates[i])) {
+          return candidates[i];
         }
       }
 
@@ -676,45 +675,62 @@
 
     function handleRecordingStartError(err) {
       const raw = String(err && err.message ? err.message : err);
-      let message = raw;
+      let msg = raw;
 
       if (
         raw.indexOf('Permission denied') !== -1 ||
         raw.indexOf('not allowed') !== -1 ||
-        raw.indexOf('NotAllowedError') !== -1 ||
-        raw.indexOf('denied permission') !== -1
+        raw.indexOf('NotAllowedError') !== -1
       ) {
-        message =
+        msg =
           '録音開始に失敗しました。\n\n' +
           'マイク権限がOFFの可能性があります。\n\n' +
-          'iPhoneの場合:\n' +
-          '設定 → Chrome または Safari → マイク → ON\n\n' +
-          'その後、このページを再読み込みしてください。\n\n' +
-          '詳細: ' + raw;
+          'iPhone/iPad:\n設定 → ChromeまたはSafari → マイク → ON\n\n' +
+          'Android:\n設定 → アプリ → Chrome → 権限 → マイク → 許可\n\n' +
+          'その後、このページを再読み込みしてください。';
       }
 
-      setStatus(message, 'danger');
+      setStatus(msg, 'danger');
       log('録音開始エラー: ' + raw);
-
       cleanupAfterError();
+    }
+
+    function handleFinalizeError(err) {
+      const msg = simplifyErrorMessage(String(err && err.message ? err.message : err));
+
+      setStatus(
+        '議事録作成でエラーが発生しました。\n\n' +
+        msg + '\n\n' +
+        '録音データがDriveに残っている場合は「議事録作成を再実行」を押してください。',
+        'danger'
+      );
+
+      log('finalizeエラー: ' + msg);
+
+      retryFinalizeButton.classList.remove('hidden');
+      startButton.disabled = false;
+      stopButton.disabled = true;
+      meetingTitleInput.disabled = false;
+      extraPromptInput.disabled = false;
+
+      isStopping = false;
     }
 
     function simplifyErrorMessage(message) {
       if (message.indexOf('HTTP 429') !== -1 || message.indexOf('RESOURCE_EXHAUSTED') !== -1) {
-        return (
-          'Gemini APIの利用上限に達しました。\n' +
-          '少し時間を置いて再実行してください。\n\n' +
-          '無料枠では長時間会議や連続利用で発生します。\n\n' +
-          message
-        );
+        return 'Gemini APIの利用上限または一時制限です。少し時間を置いて再実行してください。';
       }
 
-      if (message.indexOf('Load failed') !== -1) {
-        return (
-          '通信エラーが発生しました。\n' +
-          '通信状態を確認し、画面を閉じずに再実行してください。\n\n' +
-          message
-        );
+      if (message.indexOf('HTTP 503') !== -1) {
+        return 'Gemini APIが一時的に混雑しています。少し時間を置いて再実行してください。';
+      }
+
+      if (message.indexOf('Load failed') !== -1 || message.indexOf('Failed to fetch') !== -1) {
+        return '通信が一時的に切断されました。録音データは残っている可能性があります。再実行してください。';
+      }
+
+      if (message.length > 350) {
+        return message.substring(0, 350) + '...';
       }
 
       return message;
@@ -747,7 +763,34 @@
       const mm = String(now.getMinutes()).padStart(2, '0');
       const ss = String(now.getSeconds()).padStart(2, '0');
       const rand = Math.random().toString(36).slice(2, 8);
+
       return 'session_' + y + m + d + '_' + hh + mm + ss + '_' + rand;
+    }
+
+    function saveSessionInfo() {
+      localStorage.setItem('aiMeetingSessionId', sessionId || '');
+      localStorage.setItem('aiMeetingTitle', meetingTitleInput.value.trim());
+      localStorage.setItem('aiMeetingExtraPrompt', extraPromptInput.value.trim());
+    }
+
+    function restoreSessionInfo() {
+      const savedSessionId = localStorage.getItem('aiMeetingSessionId') || '';
+      const savedTitle = localStorage.getItem('aiMeetingTitle') || '';
+      const savedExtraPrompt = localStorage.getItem('aiMeetingExtraPrompt') || '';
+
+      if (savedSessionId) {
+        sessionId = savedSessionId;
+        meetingTitleInput.value = savedTitle;
+        extraPromptInput.value = savedExtraPrompt;
+        retryFinalizeButton.classList.remove('hidden');
+        log('前回セッションを復元: ' + sessionId);
+      }
+    }
+
+    function clearSessionInfo() {
+      localStorage.removeItem('aiMeetingSessionId');
+      localStorage.removeItem('aiMeetingTitle');
+      localStorage.removeItem('aiMeetingExtraPrompt');
     }
 
     function startTimer() {
@@ -755,7 +798,6 @@
 
       timerInterval = setInterval(function() {
         if (!recordingStartedAt) return;
-
         const sec = Math.floor((Date.now() - recordingStartedAt) / 1000);
         timerEl.textContent = formatSeconds(sec);
       }, 500);
@@ -810,7 +852,7 @@
 
     function resetScreen() {
       if (isRecording) {
-        const ok = confirm('録音中です。画面をリセットすると録音が中断されます。リセットしますか？');
+        const ok = confirm('録音中です。リセットすると録音が中断されます。リセットしますか？');
         if (!ok) return;
       }
 
@@ -818,14 +860,18 @@
 
       sessionId = '';
       chunkIndex = 0;
-      uploadedChunkCount = 0;
       pendingUploads = [];
       selectedMimeType = '';
       recordingStartedAt = null;
 
+      clearSessionInfo();
+
       meetingTitleInput.value = '';
       extraPromptInput.value = '';
       timerEl.textContent = '00:00:00';
+
+      retryFinalizeButton.classList.add('hidden');
+
       setProgress(0);
       setStatus('待機中です。', 'idle');
       clearDocLink();
@@ -838,14 +884,18 @@
 
       sessionId = '';
       chunkIndex = 0;
-      uploadedChunkCount = 0;
       pendingUploads = [];
       selectedMimeType = '';
       recordingStartedAt = null;
 
+      clearSessionInfo();
+
       meetingTitleInput.value = '';
       extraPromptInput.value = '';
       timerEl.textContent = '00:00:00';
+
+      retryFinalizeButton.classList.add('hidden');
+
       setProgress(0);
       setStatus('保存完了。次の録音を開始できます。', 'success');
 
@@ -881,11 +931,13 @@
       if (!url) return;
 
       docLinkArea.innerHTML = '';
+
       const a = document.createElement('a');
       a.href = url;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
       a.textContent = '作成した議事録を開く';
+
       docLinkArea.appendChild(a);
       docLinkArea.classList.remove('hidden');
     }
@@ -897,6 +949,7 @@
 
     function log(message) {
       const now = new Date();
+
       const stamp =
         '[' +
         now.getFullYear() + '/' +
@@ -911,12 +964,20 @@
       logBox.scrollTop = logBox.scrollHeight;
     }
 
+    function logDeviceInfo() {
+      log('userAgent: ' + navigator.userAgent);
+      log('isIOS: ' + isIOS());
+      log('isAndroid: ' + isAndroid());
+      log('secureContext: ' + window.isSecureContext);
+    }
+
     function isIOS() {
       return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-        (
-          navigator.platform === 'MacIntel' &&
-          navigator.maxTouchPoints > 1
-        );
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    }
+
+    function isAndroid() {
+      return /Android/i.test(navigator.userAgent);
     }
 
     function wait(ms) {
