@@ -18,9 +18,7 @@
       --text: #20262d;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -90,9 +88,7 @@
       resize: vertical;
     }
 
-    .field {
-      margin-bottom: 16px;
-    }
+    .field { margin-bottom: 16px; }
 
     .button {
       width: 100%;
@@ -119,9 +115,7 @@
     .button-red { background: var(--red); }
     .button-gray { background: var(--gray); }
 
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
 
     .timer {
       font-size: 30px;
@@ -222,9 +216,7 @@
       padding: 8px 0;
     }
 
-    .memo-item:last-child {
-      border-bottom: none;
-    }
+    .memo-item:last-child { border-bottom: none; }
 
     .memo-time {
       font-weight: 900;
@@ -338,6 +330,10 @@
         現在時刻でメモ追加
       </button>
 
+      <button id="quickMemoButton" class="button button-green" type="button">
+        簡易メモ入力
+      </button>
+
       <button id="clearMemoButton" class="button button-gray" type="button">
         メモ全削除
       </button>
@@ -354,8 +350,8 @@
     <div class="card">
       <h2>注意事項</h2>
       <ul class="note">
-        <li>iPhone/iPad/Androidでは、ChromeまたはSafariの通常ブラウザで開いてください。</li>
-        <li>LINE等のアプリ内ブラウザでは使用しないでください。</li>
+        <li>Mac/Windowsでは通常の手打ちメモ欄を使ってください。</li>
+        <li>iPhone/iPadで直接入力しづらい場合は「簡易メモ入力」を使ってください。</li>
         <li>録音中メモは、追加ボタンを押した時点の録音時間と一緒に保存されます。</li>
         <li>録音中は画面ロック・ブラウザ切替を避けてください。</li>
         <li>録音停止後、議事録作成完了まで画面を閉じないでください。</li>
@@ -402,6 +398,7 @@
     const manualMemoInput = document.getElementById('manualMemoInput');
     const importantMemoCheck = document.getElementById('importantMemoCheck');
     const addMemoButton = document.getElementById('addMemoButton');
+    const quickMemoButton = document.getElementById('quickMemoButton');
     const clearMemoButton = document.getElementById('clearMemoButton');
     const memoList = document.getElementById('memoList');
 
@@ -421,6 +418,7 @@
       resetButton.addEventListener('click', resetScreen);
 
       addMemoButton.addEventListener('click', addManualMemo);
+      quickMemoButton.addEventListener('click', addQuickMemo);
       clearMemoButton.addEventListener('click', clearManualMemos);
 
       if (healthButton) {
@@ -502,6 +500,12 @@
         stopButton.disabled = false;
         meetingTitleInput.disabled = true;
         extraPromptInput.disabled = true;
+
+        manualMemoInput.disabled = false;
+        importantMemoCheck.disabled = false;
+        addMemoButton.disabled = false;
+        quickMemoButton.disabled = false;
+        clearMemoButton.disabled = false;
 
         setProgress(5);
         setStatus('録音中です。必要に応じて手打ちメモを追加してください。', 'success');
@@ -640,20 +644,38 @@
         return;
       }
 
+      addMemoObject(memoText, importantMemoCheck.checked);
+
+      manualMemoInput.value = '';
+      importantMemoCheck.checked = false;
+    }
+
+    function addQuickMemo() {
+      const value = prompt('メモを入力してください');
+
+      if (value === null) return;
+
+      const memoText = String(value).trim();
+
+      if (!memoText) {
+        setStatus('メモ内容が空です。', 'warning');
+        return;
+      }
+
+      addMemoObject(memoText, true);
+    }
+
+    function addMemoObject(memoText, important) {
       const seconds = getCurrentRecordingSeconds();
       const time = formatSeconds(seconds);
-      const important = importantMemoCheck.checked;
 
       manualMemos.push({
         seconds: seconds,
         time: time,
         memo: memoText,
-        important: important,
+        important: !!important,
         createdAt: new Date().toISOString()
       });
-
-      manualMemoInput.value = '';
-      importantMemoCheck.checked = false;
 
       saveSessionInfo();
       renderMemoList();
@@ -718,9 +740,7 @@
           const msg = String(err && err.message ? err.message : err);
           log('アップロード失敗 chunk=' + currentIndex + ', attempt=' + attempt + ': ' + msg);
 
-          if (attempt >= MAX_UPLOAD_RETRY) {
-            throw err;
-          }
+          if (attempt >= MAX_UPLOAD_RETRY) throw err;
 
           await wait(UPLOAD_RETRY_BASE_MS * attempt);
         }
@@ -750,13 +770,9 @@
       try {
         setStatus('GAS接続テスト中です。', 'warning');
 
-        const result = await callGas({
-          action: 'healthCheck'
-        });
+        const result = await callGas({ action: 'healthCheck' });
 
-        if (!result.ok) {
-          throw new Error(result.error || 'healthCheck failed');
-        }
+        if (!result.ok) throw new Error(result.error || 'healthCheck failed');
 
         setStatus('GAS接続テスト成功', 'success');
         log('GAS接続テスト成功: ' + JSON.stringify(result));
@@ -777,9 +793,7 @@
           lastError = err;
           log('通信リトライ attempt=' + attempt + ': ' + String(err.message || err));
 
-          if (attempt >= maxRetry) {
-            throw err;
-          }
+          if (attempt >= maxRetry) throw err;
 
           setStatus(
             '通信が一時的に失敗しました。自動再試行中です。\n' +
@@ -1021,6 +1035,12 @@
       stopButton.disabled = true;
       meetingTitleInput.disabled = false;
       extraPromptInput.disabled = false;
+
+      manualMemoInput.disabled = false;
+      importantMemoCheck.disabled = false;
+      addMemoButton.disabled = false;
+      quickMemoButton.disabled = false;
+      clearMemoButton.disabled = false;
     }
 
     function resetScreen() {
