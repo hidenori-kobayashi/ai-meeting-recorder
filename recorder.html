@@ -75,12 +75,14 @@
     }
 
     input,
-    textarea {
+    textarea,
+    select {
       width: 100%;
       border: 1px solid var(--border);
       border-radius: 14px;
       padding: 14px;
       font-size: 17px;
+      background: #fff;
     }
 
     textarea {
@@ -264,13 +266,25 @@
       <h2>会議情報</h2>
 
       <div class="field">
+        <label for="meetingType">会議種別</label>
+        <select id="meetingType">
+          <option value="営業会議">営業会議</option>
+          <option value="経営会議">経営会議</option>
+          <option value="品質会議">品質会議</option>
+          <option value="5S推進委員会">5S推進委員会</option>
+          <option value="社員面談">社員面談</option>
+          <option value="顧客・取引先面談">顧客・取引先面談</option>
+        </select>
+      </div>
+
+      <div class="field">
         <label for="meetingTitle">議事録名</label>
-        <input type="text" id="meetingTitle" placeholder="例：2026年5月 経営会議">
+        <input type="text" id="meetingTitle" placeholder="例：2026年5月 営業会議">
       </div>
 
       <div class="field">
         <label for="extraPrompt">追加指示 任意</label>
-        <textarea id="extraPrompt" placeholder="例：決定事項と担当者を詳しく整理してください"></textarea>
+        <textarea id="extraPrompt" placeholder="例：参加者：社長、営業木下、製造長谷川。重点：受注報告、箕輪精工、商社対応。"></textarea>
       </div>
 
       <button id="resetButton" class="button button-gray" type="button">
@@ -350,6 +364,7 @@
     <div class="card">
       <h2>注意事項</h2>
       <ul class="note">
+        <li>会議種別に応じて、議事録の構成と重視項目が変わります。</li>
         <li>Mac/Windowsでは通常の手打ちメモ欄を使ってください。</li>
         <li>iPhone/iPadで直接入力しづらい場合は「簡易メモ入力」を使ってください。</li>
         <li>録音中メモは、追加ボタンを押した時点の録音時間と一緒に保存されます。</li>
@@ -381,6 +396,7 @@
     let pendingUploads = [];
     let manualMemos = [];
 
+    const meetingTypeSelect = document.getElementById('meetingType');
     const meetingTitleInput = document.getElementById('meetingTitle');
     const extraPromptInput = document.getElementById('extraPrompt');
     const startButton = document.getElementById('startButton');
@@ -498,6 +514,7 @@
 
         startButton.disabled = true;
         stopButton.disabled = false;
+        meetingTypeSelect.disabled = true;
         meetingTitleInput.disabled = true;
         extraPromptInput.disabled = true;
 
@@ -509,7 +526,7 @@
 
         setProgress(5);
         setStatus('録音中です。必要に応じて手打ちメモを追加してください。', 'success');
-        log('録音開始 sessionId=' + sessionId);
+        log('録音開始 sessionId=' + sessionId + ', meetingType=' + meetingTypeSelect.value);
 
       } catch (err) {
         handleRecordingStartError(err);
@@ -566,6 +583,7 @@
         retryFinalizeButton.classList.add('hidden');
         startButton.disabled = true;
         stopButton.disabled = true;
+        meetingTypeSelect.disabled = true;
         meetingTitleInput.disabled = true;
         extraPromptInput.disabled = true;
 
@@ -590,6 +608,7 @@
           action: 'finalizeStep',
           sessionId: sessionId,
           meetingTitle: meetingTitleInput.value.trim(),
+          meetingType: meetingTypeSelect.value,
           extraPrompt: extraPromptInput.value.trim(),
           manualMemos: manualMemos
         }, MAX_FINALIZE_RETRY);
@@ -608,6 +627,7 @@
           setStatus(
             '文字起こし分割処理中です。\n' +
             result.completedBatches + ' / ' + result.totalBatches + ' 完了\n' +
+            '会議種別：' + (result.meetingType || meetingTypeSelect.value) + '\n' +
             '手打ちメモ数：' + (result.memoCount || manualMemos.length),
             'warning'
           );
@@ -882,6 +902,7 @@
       retryFinalizeButton.classList.remove('hidden');
       startButton.disabled = false;
       stopButton.disabled = true;
+      meetingTypeSelect.disabled = false;
       meetingTitleInput.disabled = false;
       extraPromptInput.disabled = false;
 
@@ -941,6 +962,7 @@
 
     function saveSessionInfo() {
       localStorage.setItem('aiMeetingSessionId', sessionId || '');
+      localStorage.setItem('aiMeetingType', meetingTypeSelect.value);
       localStorage.setItem('aiMeetingTitle', meetingTitleInput.value.trim());
       localStorage.setItem('aiMeetingExtraPrompt', extraPromptInput.value.trim());
       localStorage.setItem('aiMeetingManualMemos', JSON.stringify(manualMemos || []));
@@ -948,9 +970,12 @@
 
     function restoreSessionInfo() {
       const savedSessionId = localStorage.getItem('aiMeetingSessionId') || '';
+      const savedMeetingType = localStorage.getItem('aiMeetingType') || '営業会議';
       const savedTitle = localStorage.getItem('aiMeetingTitle') || '';
       const savedExtraPrompt = localStorage.getItem('aiMeetingExtraPrompt') || '';
       const savedMemos = localStorage.getItem('aiMeetingManualMemos') || '[]';
+
+      meetingTypeSelect.value = savedMeetingType;
 
       if (savedSessionId) {
         sessionId = savedSessionId;
@@ -970,6 +995,7 @@
 
     function clearSessionInfo() {
       localStorage.removeItem('aiMeetingSessionId');
+      localStorage.removeItem('aiMeetingType');
       localStorage.removeItem('aiMeetingTitle');
       localStorage.removeItem('aiMeetingExtraPrompt');
       localStorage.removeItem('aiMeetingManualMemos');
@@ -1033,6 +1059,7 @@
 
       startButton.disabled = false;
       stopButton.disabled = true;
+      meetingTypeSelect.disabled = false;
       meetingTitleInput.disabled = false;
       extraPromptInput.disabled = false;
 
@@ -1060,6 +1087,7 @@
 
       clearSessionInfo();
 
+      meetingTypeSelect.value = '営業会議';
       meetingTitleInput.value = '';
       extraPromptInput.value = '';
       manualMemoInput.value = '';
@@ -1088,6 +1116,7 @@
 
       clearSessionInfo();
 
+      meetingTypeSelect.value = '営業会議';
       meetingTitleInput.value = '';
       extraPromptInput.value = '';
       manualMemoInput.value = '';
@@ -1101,6 +1130,7 @@
 
       startButton.disabled = false;
       stopButton.disabled = true;
+      meetingTypeSelect.disabled = false;
       meetingTitleInput.disabled = false;
       extraPromptInput.disabled = false;
 
