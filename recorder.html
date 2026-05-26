@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-  <title>AI議事録作成アプリ</title>
+  <title>AI会議記録作成アプリ</title>
 
   <style>
     :root {
@@ -258,8 +258,8 @@
   <div class="app">
 
     <div class="header">
-      <h1>AI議事録作成アプリ</h1>
-      <p>録音 → Gemini解析 → Googleドキュメント保存</p>
+      <h1>AI会議記録作成アプリ</h1>
+      <p>録音 → Gemini解析 → Googleドキュメント保存（検証用文字起こし全文も保存）</p>
     </div>
 
     <div class="card">
@@ -278,8 +278,13 @@
       </div>
 
       <div class="field">
-        <label for="meetingTitle">議事録名</label>
-        <input type="text" id="meetingTitle" placeholder="例：2026年5月 営業会議">
+        <label for="creatorName">作成者名</label>
+        <input type="text" id="creatorName" placeholder="例：小林、木下、山田">
+      </div>
+
+      <div class="field">
+        <label for="meetingTitle">会議記録名</label>
+        <input type="text" id="meetingTitle" placeholder="例：2026年5月 営業会議 / オークマ 価格打合せ">
       </div>
 
       <div class="field">
@@ -307,11 +312,11 @@
       </button>
 
       <button id="stopButton" class="button button-blue" type="button" disabled>
-        録音停止・議事録作成
+        録音停止・AI会議記録作成
       </button>
 
       <button id="retryFinalizeButton" class="button button-red hidden" type="button">
-        議事録作成を再実行
+        AI会議記録作成を再実行
       </button>
 
       <label>録音時間</label>
@@ -364,12 +369,12 @@
     <div class="card">
       <h2>注意事項</h2>
       <ul class="note">
-        <li>会議種別に応じて、議事録の構成と重視項目が変わります。</li>
+        <li>会議種別に応じて、AI会議記録の構成と重視項目が変わります。</li>
         <li>Mac/Windowsでは通常の手打ちメモ欄を使ってください。</li>
         <li>iPhone/iPadで直接入力しづらい場合は「簡易メモ入力」を使ってください。</li>
         <li>録音中メモは、追加ボタンを押した時点の録音時間と一緒に保存されます。</li>
         <li>録音中は画面ロック・ブラウザ切替を避けてください。</li>
-        <li>録音停止後、議事録作成完了まで画面を閉じないでください。</li>
+        <li>録音停止後、AI会議記録作成完了まで画面を閉じないでください。</li>
       </ul>
     </div>
 
@@ -393,10 +398,13 @@
     let selectedMimeType = '';
     let timerInterval = null;
     let recordingStartedAt = null;
+    let recordingStartedAtISO = '';
+    let recordingStartedAtJP = '';
     let pendingUploads = [];
     let manualMemos = [];
 
     const meetingTypeSelect = document.getElementById('meetingType');
+    const creatorNameInput = document.getElementById('creatorName');
     const meetingTitleInput = document.getElementById('meetingTitle');
     const extraPromptInput = document.getElementById('extraPrompt');
     const startButton = document.getElementById('startButton');
@@ -456,7 +464,7 @@
 
         const title = meetingTitleInput.value.trim();
         if (!title) {
-          setStatus('議事録名を入力してください。', 'warning');
+          setStatus('会議記録名を入力してください。', 'warning');
           meetingTitleInput.focus();
           return;
         }
@@ -510,11 +518,15 @@
         mediaRecorder.start(CHUNK_MS);
 
         recordingStartedAt = Date.now();
+        const startDate = new Date(recordingStartedAt);
+        recordingStartedAtISO = startDate.toISOString();
+        recordingStartedAtJP = formatDateTimeJP(startDate);
         startTimer();
 
         startButton.disabled = true;
         stopButton.disabled = false;
         meetingTypeSelect.disabled = true;
+        creatorNameInput.disabled = true;
         meetingTitleInput.disabled = true;
         extraPromptInput.disabled = true;
 
@@ -526,7 +538,7 @@
 
         setProgress(5);
         setStatus('録音中です。必要に応じて手打ちメモを追加してください。', 'success');
-        log('録音開始 sessionId=' + sessionId + ', meetingType=' + meetingTypeSelect.value);
+        log('録音開始 sessionId=' + sessionId + ', meetingType=' + meetingTypeSelect.value + ', recordingStartedAtJP=' + recordingStartedAtJP);
 
       } catch (err) {
         handleRecordingStartError(err);
@@ -584,6 +596,7 @@
         startButton.disabled = true;
         stopButton.disabled = true;
         meetingTypeSelect.disabled = true;
+        creatorNameInput.disabled = true;
         meetingTitleInput.disabled = true;
         extraPromptInput.disabled = true;
 
@@ -597,7 +610,7 @@
     async function runFinalizeLoop() {
       saveSessionInfo();
 
-      setStatus('議事録作成を開始します。分割処理中です。', 'warning');
+      setStatus('AI会議記録作成を開始します。分割処理中です。', 'warning');
       setProgress(45);
 
       let done = false;
@@ -609,8 +622,11 @@
           sessionId: sessionId,
           meetingTitle: meetingTitleInput.value.trim(),
           meetingType: meetingTypeSelect.value,
+          creatorName: creatorNameInput.value.trim(),
           extraPrompt: extraPromptInput.value.trim(),
-          manualMemos: manualMemos
+          manualMemos: manualMemos,
+          recordingStartedAtISO: recordingStartedAtISO,
+          recordingStartedAtJP: recordingStartedAtJP
         }, MAX_FINALIZE_RETRY);
 
         if (!result.ok) {
@@ -644,11 +660,11 @@
       }
 
       setProgress(100);
-      setStatus('議事録作成が完了しました。', 'success');
+      setStatus('AI会議記録作成が完了しました。', 'success');
 
       if (lastResult && lastResult.docUrl) {
         showDocLink(lastResult.docUrl);
-        log('議事録作成完了: ' + lastResult.docUrl);
+        log('AI会議記録作成完了: ' + lastResult.docUrl);
       }
 
       await wait(1200);
@@ -891,9 +907,9 @@
       const msg = simplifyErrorMessage(String(err && err.message ? err.message : err));
 
       setStatus(
-        '議事録作成でエラーが発生しました。\n\n' +
+        'AI会議記録作成でエラーが発生しました。\n\n' +
         msg + '\n\n' +
-        '録音データがDriveに残っている場合は「議事録作成を再実行」を押してください。',
+        '録音データがDriveに残っている場合は「AI会議記録作成を再実行」を押してください。',
         'danger'
       );
 
@@ -903,6 +919,7 @@
       startButton.disabled = false;
       stopButton.disabled = true;
       meetingTypeSelect.disabled = false;
+      creatorNameInput.disabled = false;
       meetingTitleInput.disabled = false;
       extraPromptInput.disabled = false;
 
@@ -963,25 +980,34 @@
     function saveSessionInfo() {
       localStorage.setItem('aiMeetingSessionId', sessionId || '');
       localStorage.setItem('aiMeetingType', meetingTypeSelect.value);
+      localStorage.setItem('aiMeetingCreatorName', creatorNameInput.value.trim());
       localStorage.setItem('aiMeetingTitle', meetingTitleInput.value.trim());
       localStorage.setItem('aiMeetingExtraPrompt', extraPromptInput.value.trim());
       localStorage.setItem('aiMeetingManualMemos', JSON.stringify(manualMemos || []));
+      localStorage.setItem('aiMeetingRecordingStartedAtISO', recordingStartedAtISO || '');
+      localStorage.setItem('aiMeetingRecordingStartedAtJP', recordingStartedAtJP || '');
     }
 
     function restoreSessionInfo() {
       const savedSessionId = localStorage.getItem('aiMeetingSessionId') || '';
       const savedMeetingType = localStorage.getItem('aiMeetingType') || '営業会議';
+      const savedCreatorName = localStorage.getItem('aiMeetingCreatorName') || '';
       const savedTitle = localStorage.getItem('aiMeetingTitle') || '';
       const savedExtraPrompt = localStorage.getItem('aiMeetingExtraPrompt') || '';
       const savedMemos = localStorage.getItem('aiMeetingManualMemos') || '[]';
+      const savedRecordingStartedAtISO = localStorage.getItem('aiMeetingRecordingStartedAtISO') || '';
+      const savedRecordingStartedAtJP = localStorage.getItem('aiMeetingRecordingStartedAtJP') || '';
 
       meetingTypeSelect.value = savedMeetingType;
 
       if (savedSessionId) {
         sessionId = savedSessionId;
+        creatorNameInput.value = savedCreatorName;
         meetingTitleInput.value = savedTitle;
         extraPromptInput.value = savedExtraPrompt;
         retryFinalizeButton.classList.remove('hidden');
+        recordingStartedAtISO = savedRecordingStartedAtISO;
+        recordingStartedAtJP = savedRecordingStartedAtJP;
         log('前回セッションを復元: ' + sessionId);
       }
 
@@ -996,9 +1022,12 @@
     function clearSessionInfo() {
       localStorage.removeItem('aiMeetingSessionId');
       localStorage.removeItem('aiMeetingType');
+      localStorage.removeItem('aiMeetingCreatorName');
       localStorage.removeItem('aiMeetingTitle');
       localStorage.removeItem('aiMeetingExtraPrompt');
       localStorage.removeItem('aiMeetingManualMemos');
+      localStorage.removeItem('aiMeetingRecordingStartedAtISO');
+      localStorage.removeItem('aiMeetingRecordingStartedAtJP');
     }
 
     function getCurrentRecordingSeconds() {
@@ -1021,6 +1050,18 @@
         clearInterval(timerInterval);
         timerInterval = null;
       }
+    }
+
+    function formatDateTimeJP(date) {
+      const d = date instanceof Date ? date : new Date(date);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+
+      return y + '/' + m + '/' + day + ' ' + hh + ':' + mm + ':' + ss;
     }
 
     function formatSeconds(totalSeconds) {
@@ -1060,6 +1101,7 @@
       startButton.disabled = false;
       stopButton.disabled = true;
       meetingTypeSelect.disabled = false;
+      creatorNameInput.disabled = false;
       meetingTitleInput.disabled = false;
       extraPromptInput.disabled = false;
 
@@ -1083,11 +1125,14 @@
       pendingUploads = [];
       selectedMimeType = '';
       recordingStartedAt = null;
+      recordingStartedAtISO = '';
+      recordingStartedAtJP = '';
       manualMemos = [];
 
       clearSessionInfo();
 
       meetingTypeSelect.value = '営業会議';
+      creatorNameInput.value = '';
       meetingTitleInput.value = '';
       extraPromptInput.value = '';
       manualMemoInput.value = '';
@@ -1112,11 +1157,14 @@
       pendingUploads = [];
       selectedMimeType = '';
       recordingStartedAt = null;
+      recordingStartedAtISO = '';
+      recordingStartedAtJP = '';
       manualMemos = [];
 
       clearSessionInfo();
 
       meetingTypeSelect.value = '営業会議';
+      creatorNameInput.value = '';
       meetingTitleInput.value = '';
       extraPromptInput.value = '';
       manualMemoInput.value = '';
@@ -1131,6 +1179,7 @@
       startButton.disabled = false;
       stopButton.disabled = true;
       meetingTypeSelect.disabled = false;
+      creatorNameInput.disabled = false;
       meetingTitleInput.disabled = false;
       extraPromptInput.disabled = false;
 
@@ -1168,7 +1217,7 @@
       a.href = url;
       a.target = '_blank';
       a.rel = 'noopener noreferrer';
-      a.textContent = '作成した議事録を開く';
+      a.textContent = '作成したAI会議記録を開く';
 
       docLinkArea.appendChild(a);
       docLinkArea.classList.remove('hidden');
