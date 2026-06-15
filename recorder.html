@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0">
-  <title>AI会議記録WEBアプリ</title>
+  <title>AI会議記録作成アプリ</title>
 
   <style>
     :root {
@@ -16,12 +16,9 @@
       --card: #ffffff;
       --border: #d8e0e8;
       --text: #20262d;
-      --yellow: #fff6df;
     }
 
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
@@ -93,9 +90,7 @@
       resize: vertical;
     }
 
-    .field {
-      margin-bottom: 16px;
-    }
+    .field { margin-bottom: 16px; }
 
     .button {
       width: 100%;
@@ -122,9 +117,7 @@
     .button-red { background: var(--red); }
     .button-gray { background: var(--gray); }
 
-    .hidden {
-      display: none !important;
-    }
+    .hidden { display: none !important; }
 
     .timer {
       font-size: 30px;
@@ -225,9 +218,7 @@
       padding: 8px 0;
     }
 
-    .memo-item:last-child {
-      border-bottom: none;
-    }
+    .memo-item:last-child { border-bottom: none; }
 
     .memo-time {
       font-weight: 900;
@@ -256,16 +247,6 @@
       font-weight: 600;
     }
 
-    .warning-box {
-      background: var(--yellow);
-      border: 1px solid #f2da99;
-      color: #6f4d00;
-      border-radius: 14px;
-      padding: 12px;
-      font-weight: 700;
-      margin-bottom: 14px;
-    }
-
     ul {
       margin: 8px 0 0 20px;
       padding: 0;
@@ -277,50 +258,47 @@
   <div class="app">
 
     <div class="header">
-      <h1>AI会議記録WEBアプリ</h1>
-      <p>録音 → 文字起こし → AI会議記録 → Googleドキュメント保存</p>
+      <h1>AI会議記録作成アプリ</h1>
+      <p>録音 → Gemini解析 → Googleドキュメント保存（検証用文字起こし全文も保存）</p>
     </div>
 
     <div class="card">
       <h2>会議情報</h2>
 
       <div class="field">
-        <label for="meetingType">会議種類</label>
+        <label for="meetingType">会議種別</label>
         <select id="meetingType">
           <option value="営業会議">営業会議</option>
           <option value="経営会議">経営会議</option>
           <option value="品質会議">品質会議</option>
           <option value="5S推進委員会">5S推進委員会</option>
-          <option value="社員面談">社員面談</option>
-          <option value="顧客面談">顧客面談</option>
-          <option value="金融機関面談">金融機関面談</option>
-          <option value="行政面談">行政面談</option>
-          <option value="その他">その他</option>
         </select>
       </div>
 
       <div class="field">
-        <label for="meetingTitle">会議記録名 必須</label>
-        <input type="text" id="meetingTitle" placeholder="例：定期預金更新・制度資金相談">
+        <label for="creatorName">作成者名</label>
+        <input type="text" id="creatorName" placeholder="例：小林、木下、山田">
       </div>
 
       <div class="field">
-        <label for="externalAttendees">先方出席者</label>
-        <textarea id="externalAttendees" placeholder="例：八十二長野銀行 小林様、担当者様"></textarea>
+        <label for="meetingTitle">会議記録名</label>
+        <input type="text" id="meetingTitle" placeholder="例：2026年5月 営業会議 / オークマ 価格打合せ">
+      </div>
+
+
+      <div class="field">
+        <label for="attendees">出席者</label>
+        <textarea id="attendees" placeholder="例：社長、常務、長谷川部長、木下課長"></textarea>
       </div>
 
       <div class="field">
-        <label for="internalAttendees">当方出席者</label>
-        <textarea id="internalAttendees" placeholder="例：小林"></textarea>
+        <label for="absentees">欠席者</label>
+        <textarea id="absentees" placeholder="例：原常務"></textarea>
       </div>
 
       <div class="field">
-        <label for="userPrompt">ユーザー追加プロンプト</label>
-        <textarea id="userPrompt" placeholder="例：制度資金、金利、景況感、必要資料、銀行側の温度感を特に拾う。発言にない数字は書かない。"></textarea>
-      </div>
-
-      <div class="warning-box">
-        録音停止後も、ユーザー追加プロンプト・出席者・会議記録名を修正してからAI会議記録を作成できます。
+        <label for="extraPrompt">追加指示 任意</label>
+        <textarea id="extraPrompt" placeholder="例：参加者：社長、営業木下、製造長谷川。重点：受注報告、箕輪精工、商社対応。"></textarea>
       </div>
 
       <button id="resetButton" class="button button-gray" type="button">
@@ -342,12 +320,8 @@
         録音開始
       </button>
 
-      <button id="stopButton" class="button button-red" type="button" disabled>
-        録音停止
-      </button>
-
-      <button id="finalizeButton" class="button button-blue" type="button" disabled>
-        AI会議記録作成
+      <button id="stopButton" class="button button-blue" type="button" disabled>
+        録音停止・AI会議記録作成
       </button>
 
       <button id="retryFinalizeButton" class="button button-red hidden" type="button">
@@ -372,7 +346,7 @@
 
       <div class="field">
         <label for="manualMemoInput">手打ちメモ</label>
-        <textarea id="manualMemoInput" placeholder="例：制度資金、4月試算表、金利見通し、必要資料"></textarea>
+        <textarea id="manualMemoInput" placeholder="例：山田さん、A-81、5月20日納品、見積再提出"></textarea>
       </div>
 
       <div class="memo-row">
@@ -404,12 +378,12 @@
     <div class="card">
       <h2>注意事項</h2>
       <ul class="note">
-        <li>このアプリは正式議事録ではなく、AI会議記録作成補助です。</li>
-        <li>録音停止後に、追加プロンプトを修正してからAI会議記録を作成できます。</li>
-        <li>会議記録名は必須です。AIにはタイトルを作らせません。</li>
-        <li>録音中メモは補助情報です。発言事実としては扱いません。</li>
+        <li>会議種別に応じて、AI会議記録の構成と重視項目が変わります。</li>
+        <li>Mac/Windowsでは通常の手打ちメモ欄を使ってください。</li>
+        <li>iPhone/iPadで直接入力しづらい場合は「簡易メモ入力」を使ってください。</li>
+        <li>録音中メモは、追加ボタンを押した時点の録音時間と一緒に保存されます。</li>
         <li>録音中は画面ロック・ブラウザ切替を避けてください。</li>
-        <li>AI会議記録作成完了まで画面を閉じないでください。</li>
+        <li>録音停止後、AI会議記録作成完了まで画面を閉じないでください。</li>
       </ul>
     </div>
 
@@ -430,8 +404,6 @@
     let chunkIndex = 0;
     let isRecording = false;
     let isStopping = false;
-    let isStopped = false;
-    let isFinalizing = false;
     let selectedMimeType = '';
     let timerInterval = null;
     let recordingStartedAt = null;
@@ -441,19 +413,17 @@
     let manualMemos = [];
 
     const meetingTypeSelect = document.getElementById('meetingType');
+    const creatorNameInput = document.getElementById('creatorName');
     const meetingTitleInput = document.getElementById('meetingTitle');
-    const externalAttendeesInput = document.getElementById('externalAttendees');
-    const internalAttendeesInput = document.getElementById('internalAttendees');
-    const userPromptInput = document.getElementById('userPrompt');
-
+    const attendeesInput = document.getElementById('attendees');
+    const absenteesInput = document.getElementById('absentees');
+    const extraPromptInput = document.getElementById('extraPrompt');
     const startButton = document.getElementById('startButton');
     const stopButton = document.getElementById('stopButton');
-    const finalizeButton = document.getElementById('finalizeButton');
     const retryFinalizeButton = document.getElementById('retryFinalizeButton');
     const resetButton = document.getElementById('resetButton');
     const healthButton = document.getElementById('healthButton');
     const debugArea = document.getElementById('debugArea');
-
     const timerEl = document.getElementById('timer');
     const statusEl = document.getElementById('status');
     const progressBar = document.getElementById('progressBar');
@@ -471,7 +441,6 @@
 
     function init() {
       const params = new URLSearchParams(location.search);
-
       if (params.get('debug') === '1') {
         debugArea.classList.remove('hidden');
       }
@@ -479,8 +448,7 @@
       restoreSessionInfo();
 
       startButton.addEventListener('click', startRecording);
-      stopButton.addEventListener('click', stopRecordingOnly);
-      finalizeButton.addEventListener('click', finalizeMeetingRecord);
+      stopButton.addEventListener('click', stopRecordingAndFinalize);
       retryFinalizeButton.addEventListener('click', retryFinalize);
       resetButton.addEventListener('click', resetScreen);
 
@@ -506,7 +474,6 @@
         retryFinalizeButton.classList.add('hidden');
 
         const title = meetingTitleInput.value.trim();
-
         if (!title) {
           setStatus('会議記録名を入力してください。', 'warning');
           meetingTitleInput.focus();
@@ -535,20 +502,12 @@
         });
 
         sessionId = createSessionId();
+        saveSessionInfo();
+
         chunkIndex = 0;
         pendingUploads = [];
-        manualMemos = manualMemos || [];
         isRecording = true;
         isStopping = false;
-        isStopped = false;
-        isFinalizing = false;
-
-        const now = new Date();
-        recordingStartedAt = now.getTime();
-        recordingStartedAtISO = now.toISOString();
-        recordingStartedAtJP = formatDateJP(now);
-
-        saveSessionInfo();
 
         const options = selectedMimeType ? { mimeType: selectedMimeType } : {};
         mediaRecorder = new MediaRecorder(mediaStream, options);
@@ -568,18 +527,19 @@
         });
 
         mediaRecorder.start(CHUNK_MS);
+
+        recordingStartedAt = Date.now();
+        const startDate = new Date(recordingStartedAt);
+        recordingStartedAtISO = startDate.toISOString();
+        recordingStartedAtJP = formatDateTimeJP(startDate);
         startTimer();
 
         startButton.disabled = true;
         stopButton.disabled = false;
-        finalizeButton.disabled = true;
-
         meetingTypeSelect.disabled = true;
+        creatorNameInput.disabled = true;
         meetingTitleInput.disabled = true;
-
-        externalAttendeesInput.disabled = false;
-        internalAttendeesInput.disabled = false;
-        userPromptInput.disabled = false;
+        extraPromptInput.disabled = true;
 
         manualMemoInput.disabled = false;
         importantMemoCheck.disabled = false;
@@ -588,20 +548,15 @@
         clearMemoButton.disabled = false;
 
         setProgress(5);
-        setStatus(
-          '録音中です。\n録音停止後に追加プロンプトを修正してからAI会議記録を作成できます。',
-          'success'
-        );
-
-        log('録音開始 sessionId=' + sessionId + ', meetingType=' + meetingTypeSelect.value);
-        log('録音開始日時=' + recordingStartedAtJP);
+        setStatus('録音中です。必要に応じて手打ちメモを追加してください。', 'success');
+        log('録音開始 sessionId=' + sessionId + ', meetingType=' + meetingTypeSelect.value + ', recordingStartedAtJP=' + recordingStartedAtJP);
 
       } catch (err) {
         handleRecordingStartError(err);
       }
     }
 
-    async function stopRecordingOnly() {
+    async function stopRecordingAndFinalize() {
       try {
         if (!isRecording || isStopping) return;
 
@@ -631,63 +586,8 @@
         });
 
         if (failedUploads.length > 0) {
-          throw new Error('一部の音声アップロードに失敗しました。通信状態を確認してください。');
+          throw new Error('一部の音声アップロードに失敗しました。通信状態を確認して再録音してください。');
         }
-
-        isStopped = true;
-        isStopping = false;
-
-        finalizeButton.disabled = false;
-        retryFinalizeButton.classList.add('hidden');
-
-        meetingTitleInput.disabled = false;
-        externalAttendeesInput.disabled = false;
-        internalAttendeesInput.disabled = false;
-        userPromptInput.disabled = false;
-
-        setProgress(40);
-        setStatus(
-          '録音停止完了。\n会議記録名・出席者・ユーザー追加プロンプトを確認してから「AI会議記録作成」を押してください。',
-          'success'
-        );
-
-        saveSessionInfo();
-        log('録音停止完了。AI会議記録作成待ち。');
-
-      } catch (err) {
-        handleFinalizeError(err);
-      }
-    }
-
-    async function finalizeMeetingRecord() {
-      try {
-        if (isFinalizing) return;
-
-        const title = meetingTitleInput.value.trim();
-
-        if (!title) {
-          setStatus('会議記録名を入力してください。', 'warning');
-          meetingTitleInput.focus();
-          return;
-        }
-
-        if (!sessionId) {
-          setStatus('録音セッションがありません。再録音してください。', 'danger');
-          return;
-        }
-
-        isFinalizing = true;
-
-        startButton.disabled = true;
-        stopButton.disabled = true;
-        finalizeButton.disabled = true;
-        retryFinalizeButton.classList.add('hidden');
-
-        meetingTypeSelect.disabled = true;
-        meetingTitleInput.disabled = true;
-        externalAttendeesInput.disabled = true;
-        internalAttendeesInput.disabled = true;
-        userPromptInput.disabled = true;
 
         await runFinalizeLoop();
 
@@ -704,17 +604,12 @@
         }
 
         retryFinalizeButton.classList.add('hidden');
-        finalizeButton.disabled = true;
         startButton.disabled = true;
         stopButton.disabled = true;
-
         meetingTypeSelect.disabled = true;
+        creatorNameInput.disabled = true;
         meetingTitleInput.disabled = true;
-        externalAttendeesInput.disabled = true;
-        internalAttendeesInput.disabled = true;
-        userPromptInput.disabled = true;
-
-        isFinalizing = true;
+        extraPromptInput.disabled = true;
 
         await runFinalizeLoop();
 
@@ -734,21 +629,19 @@
 
       while (!done) {
         const result = await callGasWithRetry({
-          action: 'finalize',
+          action: 'finalizeStep',
           sessionId: sessionId,
           meetingTitle: meetingTitleInput.value.trim(),
           meetingType: meetingTypeSelect.value,
-          userPrompt: userPromptInput.value.trim(),
-          extraPrompt: userPromptInput.value.trim(),
-          externalAttendees: externalAttendeesInput.value.trim(),
-          internalAttendees: internalAttendeesInput.value.trim(),
+          creatorName: creatorNameInput.value.trim(),
+          extraPrompt: extraPromptInput.value.trim(),
+          manualMemos: manualMemos,
           recordingStartedAtISO: recordingStartedAtISO,
-          recordingStartedAtJP: recordingStartedAtJP,
-          manualMemos: manualMemos
+          recordingStartedAtJP: recordingStartedAtJP
         }, MAX_FINALIZE_RETRY);
 
         if (!result.ok) {
-          throw new Error(result.shortError || result.error || 'finalizeに失敗しました。');
+          throw new Error(result.shortError || result.error || 'finalizeStepに失敗しました。');
         }
 
         lastResult = result;
@@ -761,12 +654,12 @@
           setStatus(
             '文字起こし分割処理中です。\n' +
             result.completedBatches + ' / ' + result.totalBatches + ' 完了\n' +
-            '会議種類：' + (result.meetingType || meetingTypeSelect.value) + '\n' +
-            '録音中メモ数：' + (result.memoCount || manualMemos.length),
+            '会議種別：' + (result.meetingType || meetingTypeSelect.value) + '\n' +
+            '手打ちメモ数：' + (result.memoCount || manualMemos.length),
             'warning'
           );
 
-          log('finalize: ' + result.completedBatches + '/' + result.totalBatches);
+          log('finalizeStep: ' + result.completedBatches + '/' + result.totalBatches);
         }
 
         if (result.done) {
@@ -787,7 +680,6 @@
 
       await wait(1200);
       resetToInitialAfterSuccess();
-
     }
 
     function addManualMemo() {
@@ -864,9 +756,7 @@
         const div = document.createElement('div');
         div.className = 'memo-item';
 
-        const importantText = item.important
-          ? '<span class="memo-important">【重要】</span> '
-          : '';
+        const importantText = item.important ? '<span class="memo-important">【重要】</span> ' : '';
 
         div.innerHTML =
           '<div><span class="memo-time">' + escapeHtml(item.time || '00:00:00') + '</span> ' +
@@ -927,9 +817,9 @@
       try {
         setStatus('GAS接続テスト中です。', 'warning');
 
-        const result = await callGas({ action: 'ping' });
+        const result = await callGas({ action: 'healthCheck' });
 
-        if (!result.ok) throw new Error(result.error || 'ping failed');
+        if (!result.ok) throw new Error(result.error || 'healthCheck failed');
 
         setStatus('GAS接続テスト成功', 'success');
         log('GAS接続テスト成功: ' + JSON.stringify(result));
@@ -946,7 +836,6 @@
       for (let attempt = 1; attempt <= maxRetry; attempt++) {
         try {
           return await callGas(payload);
-
         } catch (err) {
           lastError = err;
           log('通信リトライ attempt=' + attempt + ': ' + String(err.message || err));
@@ -1038,18 +927,14 @@
       log('finalizeエラー: ' + msg);
 
       retryFinalizeButton.classList.remove('hidden');
-      finalizeButton.disabled = false;
       startButton.disabled = false;
       stopButton.disabled = true;
-
       meetingTypeSelect.disabled = false;
+      creatorNameInput.disabled = false;
       meetingTitleInput.disabled = false;
-      externalAttendeesInput.disabled = false;
-      internalAttendeesInput.disabled = false;
-      userPromptInput.disabled = false;
+      extraPromptInput.disabled = false;
 
       isStopping = false;
-      isFinalizing = false;
     }
 
     function simplifyErrorMessage(message) {
@@ -1106,10 +991,9 @@
     function saveSessionInfo() {
       localStorage.setItem('aiMeetingSessionId', sessionId || '');
       localStorage.setItem('aiMeetingType', meetingTypeSelect.value);
+      localStorage.setItem('aiMeetingCreatorName', creatorNameInput.value.trim());
       localStorage.setItem('aiMeetingTitle', meetingTitleInput.value.trim());
-      localStorage.setItem('aiMeetingExternalAttendees', externalAttendeesInput.value.trim());
-      localStorage.setItem('aiMeetingInternalAttendees', internalAttendeesInput.value.trim());
-      localStorage.setItem('aiMeetingUserPrompt', userPromptInput.value.trim());
+      localStorage.setItem('aiMeetingExtraPrompt', extraPromptInput.value.trim());
       localStorage.setItem('aiMeetingManualMemos', JSON.stringify(manualMemos || []));
       localStorage.setItem('aiMeetingRecordingStartedAtISO', recordingStartedAtISO || '');
       localStorage.setItem('aiMeetingRecordingStartedAtJP', recordingStartedAtJP || '');
@@ -1118,34 +1002,23 @@
     function restoreSessionInfo() {
       const savedSessionId = localStorage.getItem('aiMeetingSessionId') || '';
       const savedMeetingType = localStorage.getItem('aiMeetingType') || '営業会議';
+      const savedCreatorName = localStorage.getItem('aiMeetingCreatorName') || '';
       const savedTitle = localStorage.getItem('aiMeetingTitle') || '';
-      const savedExternalAttendees = localStorage.getItem('aiMeetingExternalAttendees') || '';
-      const savedInternalAttendees = localStorage.getItem('aiMeetingInternalAttendees') || '';
-      const savedUserPrompt = localStorage.getItem('aiMeetingUserPrompt') || '';
+      const savedExtraPrompt = localStorage.getItem('aiMeetingExtraPrompt') || '';
       const savedMemos = localStorage.getItem('aiMeetingManualMemos') || '[]';
-      const savedStartedISO = localStorage.getItem('aiMeetingRecordingStartedAtISO') || '';
-      const savedStartedJP = localStorage.getItem('aiMeetingRecordingStartedAtJP') || '';
+      const savedRecordingStartedAtISO = localStorage.getItem('aiMeetingRecordingStartedAtISO') || '';
+      const savedRecordingStartedAtJP = localStorage.getItem('aiMeetingRecordingStartedAtJP') || '';
 
       meetingTypeSelect.value = savedMeetingType;
-      meetingTitleInput.value = savedTitle;
-      externalAttendeesInput.value = savedExternalAttendees;
-      internalAttendeesInput.value = savedInternalAttendees;
-      userPromptInput.value = savedUserPrompt;
-
-      recordingStartedAtISO = savedStartedISO;
-      recordingStartedAtJP = savedStartedJP;
-
-      if (savedStartedISO) {
-        const d = new Date(savedStartedISO);
-        if (!isNaN(d.getTime())) {
-          recordingStartedAt = d.getTime();
-        }
-      }
 
       if (savedSessionId) {
         sessionId = savedSessionId;
+        creatorNameInput.value = savedCreatorName;
+        meetingTitleInput.value = savedTitle;
+        extraPromptInput.value = savedExtraPrompt;
         retryFinalizeButton.classList.remove('hidden');
-        finalizeButton.disabled = false;
+        recordingStartedAtISO = savedRecordingStartedAtISO;
+        recordingStartedAtJP = savedRecordingStartedAtJP;
         log('前回セッションを復元: ' + sessionId);
       }
 
@@ -1160,10 +1033,9 @@
     function clearSessionInfo() {
       localStorage.removeItem('aiMeetingSessionId');
       localStorage.removeItem('aiMeetingType');
+      localStorage.removeItem('aiMeetingCreatorName');
       localStorage.removeItem('aiMeetingTitle');
-      localStorage.removeItem('aiMeetingExternalAttendees');
-      localStorage.removeItem('aiMeetingInternalAttendees');
-      localStorage.removeItem('aiMeetingUserPrompt');
+      localStorage.removeItem('aiMeetingExtraPrompt');
       localStorage.removeItem('aiMeetingManualMemos');
       localStorage.removeItem('aiMeetingRecordingStartedAtISO');
       localStorage.removeItem('aiMeetingRecordingStartedAtJP');
@@ -1189,6 +1061,18 @@
         clearInterval(timerInterval);
         timerInterval = null;
       }
+    }
+
+    function formatDateTimeJP(date) {
+      const d = date instanceof Date ? date : new Date(date);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      const ss = String(d.getSeconds()).padStart(2, '0');
+
+      return y + '/' + m + '/' + day + ' ' + hh + ':' + mm + ':' + ss;
     }
 
     function formatSeconds(totalSeconds) {
@@ -1224,17 +1108,13 @@
 
       isRecording = false;
       isStopping = false;
-      isFinalizing = false;
 
       startButton.disabled = false;
       stopButton.disabled = true;
-      finalizeButton.disabled = !sessionId;
-
       meetingTypeSelect.disabled = false;
+      creatorNameInput.disabled = false;
       meetingTitleInput.disabled = false;
-      externalAttendeesInput.disabled = false;
-      internalAttendeesInput.disabled = false;
-      userPromptInput.disabled = false;
+      extraPromptInput.disabled = false;
 
       manualMemoInput.disabled = false;
       importantMemoCheck.disabled = false;
@@ -1259,21 +1139,18 @@
       recordingStartedAtISO = '';
       recordingStartedAtJP = '';
       manualMemos = [];
-      isStopped = false;
 
       clearSessionInfo();
 
       meetingTypeSelect.value = '営業会議';
+      creatorNameInput.value = '';
       meetingTitleInput.value = '';
-      externalAttendeesInput.value = '';
-      internalAttendeesInput.value = '';
-      userPromptInput.value = '';
+      extraPromptInput.value = '';
       manualMemoInput.value = '';
       importantMemoCheck.checked = false;
       timerEl.textContent = '00:00:00';
 
       retryFinalizeButton.classList.add('hidden');
-      finalizeButton.disabled = true;
 
       setProgress(0);
       setStatus('待機中です。', 'idle');
@@ -1294,22 +1171,18 @@
       recordingStartedAtISO = '';
       recordingStartedAtJP = '';
       manualMemos = [];
-      isStopped = false;
-      isFinalizing = false;
 
       clearSessionInfo();
 
       meetingTypeSelect.value = '営業会議';
+      creatorNameInput.value = '';
       meetingTitleInput.value = '';
-      externalAttendeesInput.value = '';
-      internalAttendeesInput.value = '';
-      userPromptInput.value = '';
+      extraPromptInput.value = '';
       manualMemoInput.value = '';
       importantMemoCheck.checked = false;
       timerEl.textContent = '00:00:00';
 
       retryFinalizeButton.classList.add('hidden');
-      finalizeButton.disabled = true;
 
       setProgress(0);
       setStatus('保存完了。次の録音を開始できます。', 'success');
@@ -1317,10 +1190,9 @@
       startButton.disabled = false;
       stopButton.disabled = true;
       meetingTypeSelect.disabled = false;
+      creatorNameInput.disabled = false;
       meetingTitleInput.disabled = false;
-      externalAttendeesInput.disabled = false;
-      internalAttendeesInput.disabled = false;
-      userPromptInput.disabled = false;
+      extraPromptInput.disabled = false;
 
       renderMemoList();
 
@@ -1392,11 +1264,21 @@
     }
 
     function isIOS() {
-      return /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      return /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }
 
     function isAndroid() {
       return /Android/i.test(navigator.userAgent);
+    }
+
+    function escapeHtml(str) {
+      return String(str || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
     }
 
     function wait(ms) {
@@ -1405,25 +1287,12 @@
       });
     }
 
-    function escapeHtml(str) {
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
-    }
-
-    function formatDateJP(date) {
-      const y = date.getFullYear();
-      const m = String(date.getMonth() + 1).padStart(2, '0');
-      const d = String(date.getDate()).padStart(2, '0');
-      const hh = String(date.getHours()).padStart(2, '0');
-      const mm = String(date.getMinutes()).padStart(2, '0');
-      const ss = String(date.getSeconds()).padStart(2, '0');
-
-      return y + '/' + m + '/' + d + ' ' + hh + ':' + mm + ':' + ss;
-    }
+    window.addEventListener('beforeunload', function(e) {
+      if (isRecording || isStopping) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    });
   </script>
 </body>
 </html>
