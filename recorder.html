@@ -282,7 +282,7 @@
 
       <div class="field">
         <label for="meetingTitle">会議記録名</label>
-        <input type="text" id="meetingTitle" placeholder="例：2026年5月 営業会議 / オークマ 価格打合せ">
+        <input type="text" id="meetingTitle" placeholder="例：2026年5月 営業会議">
       </div>
 
 
@@ -298,7 +298,7 @@
 
       <div class="field">
         <label for="extraPrompt">追加指示 任意</label>
-        <textarea id="extraPrompt" placeholder="例：参加者：社長、営業木下、製造長谷川。重点：受注報告、箕輪精工、商社対応。"></textarea>
+        <textarea id="extraPrompt" placeholder="例：発言者：社長、営業木下、製造長谷川。顧客名：箕輪精工、ニデック"></textarea>
       </div>
 
       <button id="resetButton" class="button button-gray" type="button">
@@ -539,6 +539,8 @@
         meetingTypeSelect.disabled = true;
         creatorNameInput.disabled = true;
         meetingTitleInput.disabled = true;
+        attendeesInput.disabled = true;
+        absenteesInput.disabled = true;
         extraPromptInput.disabled = true;
 
         manualMemoInput.disabled = false;
@@ -609,6 +611,8 @@
         meetingTypeSelect.disabled = true;
         creatorNameInput.disabled = true;
         meetingTitleInput.disabled = true;
+        attendeesInput.disabled = true;
+        absenteesInput.disabled = true;
         extraPromptInput.disabled = true;
 
         await runFinalizeLoop();
@@ -633,6 +637,8 @@
           sessionId: sessionId,
           meetingTitle: meetingTitleInput.value.trim(),
           meetingType: meetingTypeSelect.value,
+          attendees: attendeesInput.value.trim(),
+          absentees: absenteesInput.value.trim(),
           creatorName: creatorNameInput.value.trim(),
           extraPrompt: extraPromptInput.value.trim(),
           manualMemos: manualMemos,
@@ -932,6 +938,8 @@
       meetingTypeSelect.disabled = false;
       creatorNameInput.disabled = false;
       meetingTitleInput.disabled = false;
+      attendeesInput.disabled = false;
+      absenteesInput.disabled = false;
       extraPromptInput.disabled = false;
 
       isStopping = false;
@@ -993,6 +1001,8 @@
       localStorage.setItem('aiMeetingType', meetingTypeSelect.value);
       localStorage.setItem('aiMeetingCreatorName', creatorNameInput.value.trim());
       localStorage.setItem('aiMeetingTitle', meetingTitleInput.value.trim());
+      localStorage.setItem('aiMeetingAttendees', attendeesInput.value.trim());
+      localStorage.setItem('aiMeetingAbsentees', absenteesInput.value.trim());
       localStorage.setItem('aiMeetingExtraPrompt', extraPromptInput.value.trim());
       localStorage.setItem('aiMeetingManualMemos', JSON.stringify(manualMemos || []));
       localStorage.setItem('aiMeetingRecordingStartedAtISO', recordingStartedAtISO || '');
@@ -1004,6 +1014,8 @@
       const savedMeetingType = localStorage.getItem('aiMeetingType') || '営業会議';
       const savedCreatorName = localStorage.getItem('aiMeetingCreatorName') || '';
       const savedTitle = localStorage.getItem('aiMeetingTitle') || '';
+      const savedAttendees = localStorage.getItem('aiMeetingAttendees') || '';
+      const savedAbsentees = localStorage.getItem('aiMeetingAbsentees') || '';
       const savedExtraPrompt = localStorage.getItem('aiMeetingExtraPrompt') || '';
       const savedMemos = localStorage.getItem('aiMeetingManualMemos') || '[]';
       const savedRecordingStartedAtISO = localStorage.getItem('aiMeetingRecordingStartedAtISO') || '';
@@ -1015,6 +1027,8 @@
         sessionId = savedSessionId;
         creatorNameInput.value = savedCreatorName;
         meetingTitleInput.value = savedTitle;
+        attendeesInput.value = savedAttendees;
+        absenteesInput.value = savedAbsentees;
         extraPromptInput.value = savedExtraPrompt;
         retryFinalizeButton.classList.remove('hidden');
         recordingStartedAtISO = savedRecordingStartedAtISO;
@@ -1035,6 +1049,8 @@
       localStorage.removeItem('aiMeetingType');
       localStorage.removeItem('aiMeetingCreatorName');
       localStorage.removeItem('aiMeetingTitle');
+      localStorage.removeItem('aiMeetingAttendees');
+      localStorage.removeItem('aiMeetingAbsentees');
       localStorage.removeItem('aiMeetingExtraPrompt');
       localStorage.removeItem('aiMeetingManualMemos');
       localStorage.removeItem('aiMeetingRecordingStartedAtISO');
@@ -1114,6 +1130,8 @@
       meetingTypeSelect.disabled = false;
       creatorNameInput.disabled = false;
       meetingTitleInput.disabled = false;
+      attendeesInput.disabled = false;
+      absenteesInput.disabled = false;
       extraPromptInput.disabled = false;
 
       manualMemoInput.disabled = false;
@@ -1145,6 +1163,8 @@
       meetingTypeSelect.value = '営業会議';
       creatorNameInput.value = '';
       meetingTitleInput.value = '';
+      attendeesInput.value = '';
+      absenteesInput.value = '';
       extraPromptInput.value = '';
       manualMemoInput.value = '';
       importantMemoCheck.checked = false;
@@ -1177,6 +1197,8 @@
       meetingTypeSelect.value = '営業会議';
       creatorNameInput.value = '';
       meetingTitleInput.value = '';
+      attendeesInput.value = '';
+      absenteesInput.value = '';
       extraPromptInput.value = '';
       manualMemoInput.value = '';
       importantMemoCheck.checked = false;
@@ -1192,6 +1214,8 @@
       meetingTypeSelect.disabled = false;
       creatorNameInput.disabled = false;
       meetingTitleInput.disabled = false;
+      attendeesInput.disabled = false;
+      absenteesInput.disabled = false;
       extraPromptInput.disabled = false;
 
       renderMemoList();
